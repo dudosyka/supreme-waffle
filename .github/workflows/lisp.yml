@@ -4,15 +4,9 @@ on:
   push:
     branches:
       - master
-    paths:
-      - ".github/workflows/*"
-      - "**"
   pull_request:
     branches:
       - master
-    paths:
-      - ".github/workflows/*"
-      - "**"
 
 defaults:
   run:
