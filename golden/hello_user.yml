@@ -1,0 +1,300 @@
+in_source: |-
+  (print "W" "h" "a" "t" "\s" "i" "s" "\s" "y" "o" "u" "r" "\s" "n" "a" "m" "e" "?" "\s")
+  (print "H" "e" "l" "l" "o" "," "\s")
+  (input a)
+  (loop (!= a 0)
+      (print a)
+      (input a)
+  )
+in_stdin: |-
+  alex
+out_code: |
+  JP 26 
+  NOP  
+  NOP  
+  NOP  
+  NOP  
+  NOP  
+  NOP  
+  NOP  
+  NOP  
+  NOP  
+  NOP  
+  NOP  
+  NOP  
+  NOP  
+  NOP  
+  NOP  
+  NOP  
+  NOP  
+  NOP  
+  NOP  
+  NOP  
+  NOP  
+  NOP  
+  NOP  
+  NOP  
+  NOP  
+  LIT 87 
+  ST 2 
+  LIT 104 
+  ST 3 
+  LIT 97 
+  ST 4 
+  LIT 116 
+  ST 5 
+  LIT 32 
+  ST 6 
+  LIT 105 
+  ST 7 
+  LIT 115 
+  ST 8 
+  LIT 32 
+  ST 9 
+  LIT 121 
+  ST 10 
+  LIT 111 
+  ST 11 
+  LIT 117 
+  ST 12 
+  LIT 114 
+  ST 13 
+  LIT 32 
+  ST 14 
+  LIT 110 
+  ST 15 
+  LIT 109 
+  ST 16 
+  LIT 101 
+  ST 17 
+  LIT 63 
+  ST 18 
+  LIT 32 
+  ST 19 
+  LIT 72 
+  ST 20 
+  LIT 108 
+  ST 21 
+  LIT 44 
+  ST 22 
+  LIT 32 
+  ST 23 
+  LIT 0 
+  ST 24 
+  LD 2 
+  OUT 0 
+  LD 3 
+  OUT 0 
+  LD 4 
+  OUT 0 
+  LD 5 
+  OUT 0 
+  LD 6 
+  OUT 0 
+  LD 7 
+  OUT 0 
+  LD 8 
+  OUT 0 
+  LD 9 
+  OUT 0 
+  LD 10 
+  OUT 0 
+  LD 11 
+  OUT 0 
+  LD 12 
+  OUT 0 
+  LD 13 
+  OUT 0 
+  LD 14 
+  OUT 0 
+  LD 15 
+  OUT 0 
+  LD 4 
+  OUT 0 
+  LD 16 
+  OUT 0 
+  LD 17 
+  OUT 0 
+  LD 18 
+  OUT 0 
+  LD 19 
+  OUT 0 
+  LD 20 
+  OUT 0 
+  LD 17 
+  OUT 0 
+  LD 21 
+  OUT 0 
+  LD 21 
+  OUT 0 
+  LD 11 
+  OUT 0 
+  LD 22 
+  OUT 0 
+  LD 23 
+  OUT 0 
+  LD 24 
+  ST 25 
+  IN 1 
+  ST 25 
+  LD 25 
+  NEQ 24 
+  JPZ 138 
+  LD 25 
+  OUT 0 
+  LD 24 
+  ST 25 
+  IN 1 
+  ST 25 
+  JP 128 
+  HLT  
+out_stdout: |
+  source LoC: 6 code instr: 139
+  ============================================================
+  What is your name? Hello, alex
+  ------------ ФИО ------------- | alg | LoC | code | инстр. | такт. 
+  Шляпников Александр Дмитриевич | --- | --- | 139 | 140 | 148
+out_log: |
+  DEBUG   machine:log           TICK:   1 PC:  26 ADDR:   0 MEM_OUT: Opcode.JP ACC: 0 OP_REG: 0 COMMAND: LIT 87@26
+  DEBUG   machine:log           TICK:   2 PC:  27 ADDR:   0 MEM_OUT: Opcode.JP ACC: 87 OP_REG: 0 COMMAND: ST 2@27
+  DEBUG   machine:log           TICK:   3 PC:  28 ADDR:   2 MEM_OUT: 87 ACC: 87 OP_REG: 0 COMMAND: LIT 104@28
+  DEBUG   machine:log           TICK:   4 PC:  29 ADDR:   2 MEM_OUT: 87 ACC: 104 OP_REG: 0 COMMAND: ST 3@29
+  DEBUG   machine:log           TICK:   5 PC:  30 ADDR:   3 MEM_OUT: 104 ACC: 104 OP_REG: 0 COMMAND: LIT 97@30
+  DEBUG   machine:log           TICK:   6 PC:  31 ADDR:   3 MEM_OUT: 104 ACC: 97 OP_REG: 0 COMMAND: ST 4@31
+  DEBUG   machine:log           TICK:   7 PC:  32 ADDR:   4 MEM_OUT: 97 ACC: 97 OP_REG: 0 COMMAND: LIT 116@32
+  DEBUG   machine:log           TICK:   8 PC:  33 ADDR:   4 MEM_OUT: 97 ACC: 116 OP_REG: 0 COMMAND: ST 5@33
+  DEBUG   machine:log           TICK:   9 PC:  34 ADDR:   5 MEM_OUT: 116 ACC: 116 OP_REG: 0 COMMAND: LIT 32@34
+  DEBUG   machine:log           TICK:  10 PC:  35 ADDR:   5 MEM_OUT: 116 ACC: 32 OP_REG: 0 COMMAND: ST 6@35
+  DEBUG   machine:log           TICK:  11 PC:  36 ADDR:   6 MEM_OUT: 32 ACC: 32 OP_REG: 0 COMMAND: LIT 105@36
+  DEBUG   machine:log           TICK:  12 PC:  37 ADDR:   6 MEM_OUT: 32 ACC: 105 OP_REG: 0 COMMAND: ST 7@37
+  DEBUG   machine:log           TICK:  13 PC:  38 ADDR:   7 MEM_OUT: 105 ACC: 105 OP_REG: 0 COMMAND: LIT 115@38
+  DEBUG   machine:log           TICK:  14 PC:  39 ADDR:   7 MEM_OUT: 105 ACC: 115 OP_REG: 0 COMMAND: ST 8@39
+  DEBUG   machine:log           TICK:  15 PC:  40 ADDR:   8 MEM_OUT: 115 ACC: 115 OP_REG: 0 COMMAND: LIT 32@40
+  DEBUG   machine:log           TICK:  16 PC:  41 ADDR:   8 MEM_OUT: 115 ACC: 32 OP_REG: 0 COMMAND: ST 9@41
+  DEBUG   machine:log           TICK:  17 PC:  42 ADDR:   9 MEM_OUT: 32 ACC: 32 OP_REG: 0 COMMAND: LIT 121@42
+  DEBUG   machine:log           TICK:  18 PC:  43 ADDR:   9 MEM_OUT: 32 ACC: 121 OP_REG: 0 COMMAND: ST 10@43
+  DEBUG   machine:log           TICK:  19 PC:  44 ADDR:  10 MEM_OUT: 121 ACC: 121 OP_REG: 0 COMMAND: LIT 111@44
+  DEBUG   machine:log           TICK:  20 PC:  45 ADDR:  10 MEM_OUT: 121 ACC: 111 OP_REG: 0 COMMAND: ST 11@45
+  DEBUG   machine:log           TICK:  21 PC:  46 ADDR:  11 MEM_OUT: 111 ACC: 111 OP_REG: 0 COMMAND: LIT 117@46
+  DEBUG   machine:log           TICK:  22 PC:  47 ADDR:  11 MEM_OUT: 111 ACC: 117 OP_REG: 0 COMMAND: ST 12@47
+  DEBUG   machine:log           TICK:  23 PC:  48 ADDR:  12 MEM_OUT: 117 ACC: 117 OP_REG: 0 COMMAND: LIT 114@48
+  DEBUG   machine:log           TICK:  24 PC:  49 ADDR:  12 MEM_OUT: 117 ACC: 114 OP_REG: 0 COMMAND: ST 13@49
+  DEBUG   machine:log           TICK:  25 PC:  50 ADDR:  13 MEM_OUT: 114 ACC: 114 OP_REG: 0 COMMAND: LIT 32@50
+  DEBUG   machine:log           TICK:  26 PC:  51 ADDR:  13 MEM_OUT: 114 ACC: 32 OP_REG: 0 COMMAND: ST 14@51
+  DEBUG   machine:log           TICK:  27 PC:  52 ADDR:  14 MEM_OUT: 32 ACC: 32 OP_REG: 0 COMMAND: LIT 110@52
+  DEBUG   machine:log           TICK:  28 PC:  53 ADDR:  14 MEM_OUT: 32 ACC: 110 OP_REG: 0 COMMAND: ST 15@53
+  DEBUG   machine:log           TICK:  29 PC:  54 ADDR:  15 MEM_OUT: 110 ACC: 110 OP_REG: 0 COMMAND: LIT 109@54
+  DEBUG   machine:log           TICK:  30 PC:  55 ADDR:  15 MEM_OUT: 110 ACC: 109 OP_REG: 0 COMMAND: ST 16@55
+  DEBUG   machine:log           TICK:  31 PC:  56 ADDR:  16 MEM_OUT: 109 ACC: 109 OP_REG: 0 COMMAND: LIT 101@56
+  DEBUG   machine:log           TICK:  32 PC:  57 ADDR:  16 MEM_OUT: 109 ACC: 101 OP_REG: 0 COMMAND: ST 17@57
+  DEBUG   machine:log           TICK:  33 PC:  58 ADDR:  17 MEM_OUT: 101 ACC: 101 OP_REG: 0 COMMAND: LIT 63@58
+  DEBUG   machine:log           TICK:  34 PC:  59 ADDR:  17 MEM_OUT: 101 ACC: 63 OP_REG: 0 COMMAND: ST 18@59
+  DEBUG   machine:log           TICK:  35 PC:  60 ADDR:  18 MEM_OUT: 63 ACC: 63 OP_REG: 0 COMMAND: LIT 32@60
+  DEBUG   machine:log           TICK:  36 PC:  61 ADDR:  18 MEM_OUT: 63 ACC: 32 OP_REG: 0 COMMAND: ST 19@61
+  DEBUG   machine:log           TICK:  37 PC:  62 ADDR:  19 MEM_OUT: 32 ACC: 32 OP_REG: 0 COMMAND: LIT 72@62
+  DEBUG   machine:log           TICK:  38 PC:  63 ADDR:  19 MEM_OUT: 32 ACC: 72 OP_REG: 0 COMMAND: ST 20@63
+  DEBUG   machine:log           TICK:  39 PC:  64 ADDR:  20 MEM_OUT: 72 ACC: 72 OP_REG: 0 COMMAND: LIT 108@64
+  DEBUG   machine:log           TICK:  40 PC:  65 ADDR:  20 MEM_OUT: 72 ACC: 108 OP_REG: 0 COMMAND: ST 21@65
+  DEBUG   machine:log           TICK:  41 PC:  66 ADDR:  21 MEM_OUT: 108 ACC: 108 OP_REG: 0 COMMAND: LIT 44@66
+  DEBUG   machine:log           TICK:  42 PC:  67 ADDR:  21 MEM_OUT: 108 ACC: 44 OP_REG: 0 COMMAND: ST 22@67
+  DEBUG   machine:log           TICK:  43 PC:  68 ADDR:  22 MEM_OUT: 44 ACC: 44 OP_REG: 0 COMMAND: LIT 32@68
+  DEBUG   machine:log           TICK:  44 PC:  69 ADDR:  22 MEM_OUT: 44 ACC: 32 OP_REG: 0 COMMAND: ST 23@69
+  DEBUG   machine:log           TICK:  45 PC:  70 ADDR:  23 MEM_OUT: 32 ACC: 32 OP_REG: 0 COMMAND: LIT 0@70
+  DEBUG   machine:log           TICK:  46 PC:  71 ADDR:  23 MEM_OUT: 32 ACC: 0 OP_REG: 0 COMMAND: ST 24@71
+  DEBUG   machine:log           TICK:  47 PC:  72 ADDR:  24 MEM_OUT: 0 ACC: 0 OP_REG: 0 COMMAND: LD 2@72
+  DEBUG   machine:log           TICK:  48 PC:  73 ADDR:   2 MEM_OUT: 87 ACC: 87 OP_REG: 0 COMMAND: OUT 0@73
+  DEBUG   machine:log           TICK:  49 PC:  74 ADDR:   2 MEM_OUT: 87 ACC: 87 OP_REG: 0 COMMAND: LD 3@74
+  DEBUG   machine:log           TICK:  50 PC:  75 ADDR:   3 MEM_OUT: 104 ACC: 104 OP_REG: 0 COMMAND: OUT 0@75
+  DEBUG   machine:log           TICK:  51 PC:  76 ADDR:   3 MEM_OUT: 104 ACC: 104 OP_REG: 0 COMMAND: LD 4@76
+  DEBUG   machine:log           TICK:  52 PC:  77 ADDR:   4 MEM_OUT: 97 ACC: 97 OP_REG: 0 COMMAND: OUT 0@77
+  DEBUG   machine:log           TICK:  53 PC:  78 ADDR:   4 MEM_OUT: 97 ACC: 97 OP_REG: 0 COMMAND: LD 5@78
+  DEBUG   machine:log           TICK:  54 PC:  79 ADDR:   5 MEM_OUT: 116 ACC: 116 OP_REG: 0 COMMAND: OUT 0@79
+  DEBUG   machine:log           TICK:  55 PC:  80 ADDR:   5 MEM_OUT: 116 ACC: 116 OP_REG: 0 COMMAND: LD 6@80
+  DEBUG   machine:log           TICK:  56 PC:  81 ADDR:   6 MEM_OUT: 32 ACC: 32 OP_REG: 0 COMMAND: OUT 0@81
+  DEBUG   machine:log           TICK:  57 PC:  82 ADDR:   6 MEM_OUT: 32 ACC: 32 OP_REG: 0 COMMAND: LD 7@82
+  DEBUG   machine:log           TICK:  58 PC:  83 ADDR:   7 MEM_OUT: 105 ACC: 105 OP_REG: 0 COMMAND: OUT 0@83
+  DEBUG   machine:log           TICK:  59 PC:  84 ADDR:   7 MEM_OUT: 105 ACC: 105 OP_REG: 0 COMMAND: LD 8@84
+  DEBUG   machine:log           TICK:  60 PC:  85 ADDR:   8 MEM_OUT: 115 ACC: 115 OP_REG: 0 COMMAND: OUT 0@85
+  DEBUG   machine:log           TICK:  61 PC:  86 ADDR:   8 MEM_OUT: 115 ACC: 115 OP_REG: 0 COMMAND: LD 9@86
+  DEBUG   machine:log           TICK:  62 PC:  87 ADDR:   9 MEM_OUT: 32 ACC: 32 OP_REG: 0 COMMAND: OUT 0@87
+  DEBUG   machine:log           TICK:  63 PC:  88 ADDR:   9 MEM_OUT: 32 ACC: 32 OP_REG: 0 COMMAND: LD 10@88
+  DEBUG   machine:log           TICK:  64 PC:  89 ADDR:  10 MEM_OUT: 121 ACC: 121 OP_REG: 0 COMMAND: OUT 0@89
+  DEBUG   machine:log           TICK:  65 PC:  90 ADDR:  10 MEM_OUT: 121 ACC: 121 OP_REG: 0 COMMAND: LD 11@90
+  DEBUG   machine:log           TICK:  66 PC:  91 ADDR:  11 MEM_OUT: 111 ACC: 111 OP_REG: 0 COMMAND: OUT 0@91
+  DEBUG   machine:log           TICK:  67 PC:  92 ADDR:  11 MEM_OUT: 111 ACC: 111 OP_REG: 0 COMMAND: LD 12@92
+  DEBUG   machine:log           TICK:  68 PC:  93 ADDR:  12 MEM_OUT: 117 ACC: 117 OP_REG: 0 COMMAND: OUT 0@93
+  DEBUG   machine:log           TICK:  69 PC:  94 ADDR:  12 MEM_OUT: 117 ACC: 117 OP_REG: 0 COMMAND: LD 13@94
+  DEBUG   machine:log           TICK:  70 PC:  95 ADDR:  13 MEM_OUT: 114 ACC: 114 OP_REG: 0 COMMAND: OUT 0@95
+  DEBUG   machine:log           TICK:  71 PC:  96 ADDR:  13 MEM_OUT: 114 ACC: 114 OP_REG: 0 COMMAND: LD 14@96
+  DEBUG   machine:log           TICK:  72 PC:  97 ADDR:  14 MEM_OUT: 32 ACC: 32 OP_REG: 0 COMMAND: OUT 0@97
+  DEBUG   machine:log           TICK:  73 PC:  98 ADDR:  14 MEM_OUT: 32 ACC: 32 OP_REG: 0 COMMAND: LD 15@98
+  DEBUG   machine:log           TICK:  74 PC:  99 ADDR:  15 MEM_OUT: 110 ACC: 110 OP_REG: 0 COMMAND: OUT 0@99
+  DEBUG   machine:log           TICK:  75 PC: 100 ADDR:  15 MEM_OUT: 110 ACC: 110 OP_REG: 0 COMMAND: LD 4@100
+  DEBUG   machine:log           TICK:  76 PC: 101 ADDR:   4 MEM_OUT: 97 ACC: 97 OP_REG: 0 COMMAND: OUT 0@101
+  DEBUG   machine:log           TICK:  77 PC: 102 ADDR:   4 MEM_OUT: 97 ACC: 97 OP_REG: 0 COMMAND: LD 16@102
+  DEBUG   machine:log           TICK:  78 PC: 103 ADDR:  16 MEM_OUT: 109 ACC: 109 OP_REG: 0 COMMAND: OUT 0@103
+  DEBUG   machine:log           TICK:  79 PC: 104 ADDR:  16 MEM_OUT: 109 ACC: 109 OP_REG: 0 COMMAND: LD 17@104
+  DEBUG   machine:log           TICK:  80 PC: 105 ADDR:  17 MEM_OUT: 101 ACC: 101 OP_REG: 0 COMMAND: OUT 0@105
+  DEBUG   machine:log           TICK:  81 PC: 106 ADDR:  17 MEM_OUT: 101 ACC: 101 OP_REG: 0 COMMAND: LD 18@106
+  DEBUG   machine:log           TICK:  82 PC: 107 ADDR:  18 MEM_OUT: 63 ACC: 63 OP_REG: 0 COMMAND: OUT 0@107
+  DEBUG   machine:log           TICK:  83 PC: 108 ADDR:  18 MEM_OUT: 63 ACC: 63 OP_REG: 0 COMMAND: LD 19@108
+  DEBUG   machine:log           TICK:  84 PC: 109 ADDR:  19 MEM_OUT: 32 ACC: 32 OP_REG: 0 COMMAND: OUT 0@109
+  DEBUG   machine:log           TICK:  85 PC: 110 ADDR:  19 MEM_OUT: 32 ACC: 32 OP_REG: 0 COMMAND: LD 20@110
+  DEBUG   machine:log           TICK:  86 PC: 111 ADDR:  20 MEM_OUT: 72 ACC: 72 OP_REG: 0 COMMAND: OUT 0@111
+  DEBUG   machine:log           TICK:  87 PC: 112 ADDR:  20 MEM_OUT: 72 ACC: 72 OP_REG: 0 COMMAND: LD 17@112
+  DEBUG   machine:log           TICK:  88 PC: 113 ADDR:  17 MEM_OUT: 101 ACC: 101 OP_REG: 0 COMMAND: OUT 0@113
+  DEBUG   machine:log           TICK:  89 PC: 114 ADDR:  17 MEM_OUT: 101 ACC: 101 OP_REG: 0 COMMAND: LD 21@114
+  DEBUG   machine:log           TICK:  90 PC: 115 ADDR:  21 MEM_OUT: 108 ACC: 108 OP_REG: 0 COMMAND: OUT 0@115
+  DEBUG   machine:log           TICK:  91 PC: 116 ADDR:  21 MEM_OUT: 108 ACC: 108 OP_REG: 0 COMMAND: LD 21@116
+  DEBUG   machine:log           TICK:  92 PC: 117 ADDR:  21 MEM_OUT: 108 ACC: 108 OP_REG: 0 COMMAND: OUT 0@117
+  DEBUG   machine:log           TICK:  93 PC: 118 ADDR:  21 MEM_OUT: 108 ACC: 108 OP_REG: 0 COMMAND: LD 11@118
+  DEBUG   machine:log           TICK:  94 PC: 119 ADDR:  11 MEM_OUT: 111 ACC: 111 OP_REG: 0 COMMAND: OUT 0@119
+  DEBUG   machine:log           TICK:  95 PC: 120 ADDR:  11 MEM_OUT: 111 ACC: 111 OP_REG: 0 COMMAND: LD 22@120
+  DEBUG   machine:log           TICK:  96 PC: 121 ADDR:  22 MEM_OUT: 44 ACC: 44 OP_REG: 0 COMMAND: OUT 0@121
+  DEBUG   machine:log           TICK:  97 PC: 122 ADDR:  22 MEM_OUT: 44 ACC: 44 OP_REG: 0 COMMAND: LD 23@122
+  DEBUG   machine:log           TICK:  98 PC: 123 ADDR:  23 MEM_OUT: 32 ACC: 32 OP_REG: 0 COMMAND: OUT 0@123
+  DEBUG   machine:log           TICK:  99 PC: 124 ADDR:  23 MEM_OUT: 32 ACC: 32 OP_REG: 0 COMMAND: LD 24@124
+  DEBUG   machine:log           TICK: 100 PC: 125 ADDR:  24 MEM_OUT: 0 ACC: 0 OP_REG: 0 COMMAND: ST 25@125
+  DEBUG   machine:log           TICK: 101 PC: 126 ADDR:  25 MEM_OUT: 0 ACC: 0 OP_REG: 0 COMMAND: IN 1@126
+  DEBUG   machine:log           TICK: 102 PC: 127 ADDR:  25 MEM_OUT: 0 ACC: 97 OP_REG: 0 COMMAND: ST 25@127
+  DEBUG   machine:log           TICK: 103 PC: 128 ADDR:  25 MEM_OUT: 97 ACC: 97 OP_REG: 0 COMMAND: LD 25@128
+  DEBUG   machine:log           TICK: 104 PC: 129 ADDR:  25 MEM_OUT: 97 ACC: 97 OP_REG: 0 COMMAND: NEQ 24@129
+  DEBUG   machine:log           TICK: 107 PC: 130 ADDR:  24 MEM_OUT: 0 ACC: 1 OP_REG: 97 COMMAND: JPZ 138@130
+  DEBUG   machine:log           TICK: 108 PC: 131 ADDR:  24 MEM_OUT: 0 ACC: 1 OP_REG: 97 COMMAND: LD 25@131
+  DEBUG   machine:log           TICK: 109 PC: 132 ADDR:  25 MEM_OUT: 97 ACC: 97 OP_REG: 97 COMMAND: OUT 0@132
+  DEBUG   machine:log           TICK: 110 PC: 133 ADDR:  25 MEM_OUT: 97 ACC: 97 OP_REG: 97 COMMAND: LD 24@133
+  DEBUG   machine:log           TICK: 111 PC: 134 ADDR:  24 MEM_OUT: 0 ACC: 0 OP_REG: 97 COMMAND: ST 25@134
+  DEBUG   machine:log           TICK: 112 PC: 135 ADDR:  25 MEM_OUT: 0 ACC: 0 OP_REG: 97 COMMAND: IN 1@135
+  DEBUG   machine:log           TICK: 113 PC: 136 ADDR:  25 MEM_OUT: 0 ACC: 108 OP_REG: 97 COMMAND: ST 25@136
+  DEBUG   machine:log           TICK: 114 PC: 137 ADDR:  25 MEM_OUT: 108 ACC: 108 OP_REG: 97 COMMAND: JP 128@137
+  DEBUG   machine:log           TICK: 115 PC: 128 ADDR:  25 MEM_OUT: 108 ACC: 108 OP_REG: 97 COMMAND: LD 25@128
+  DEBUG   machine:log           TICK: 116 PC: 129 ADDR:  25 MEM_OUT: 108 ACC: 108 OP_REG: 97 COMMAND: NEQ 24@129
+  DEBUG   machine:log           TICK: 119 PC: 130 ADDR:  24 MEM_OUT: 0 ACC: 1 OP_REG: 108 COMMAND: JPZ 138@130
+  DEBUG   machine:log           TICK: 120 PC: 131 ADDR:  24 MEM_OUT: 0 ACC: 1 OP_REG: 108 COMMAND: LD 25@131
+  DEBUG   machine:log           TICK: 121 PC: 132 ADDR:  25 MEM_OUT: 108 ACC: 108 OP_REG: 108 COMMAND: OUT 0@132
+  DEBUG   machine:log           TICK: 122 PC: 133 ADDR:  25 MEM_OUT: 108 ACC: 108 OP_REG: 108 COMMAND: LD 24@133
+  DEBUG   machine:log           TICK: 123 PC: 134 ADDR:  24 MEM_OUT: 0 ACC: 0 OP_REG: 108 COMMAND: ST 25@134
+  DEBUG   machine:log           TICK: 124 PC: 135 ADDR:  25 MEM_OUT: 0 ACC: 0 OP_REG: 108 COMMAND: IN 1@135
+  DEBUG   machine:log           TICK: 125 PC: 136 ADDR:  25 MEM_OUT: 0 ACC: 101 OP_REG: 108 COMMAND: ST 25@136
+  DEBUG   machine:log           TICK: 126 PC: 137 ADDR:  25 MEM_OUT: 101 ACC: 101 OP_REG: 108 COMMAND: JP 128@137
+  DEBUG   machine:log           TICK: 127 PC: 128 ADDR:  25 MEM_OUT: 101 ACC: 101 OP_REG: 108 COMMAND: LD 25@128
+  DEBUG   machine:log           TICK: 128 PC: 129 ADDR:  25 MEM_OUT: 101 ACC: 101 OP_REG: 108 COMMAND: NEQ 24@129
+  DEBUG   machine:log           TICK: 131 PC: 130 ADDR:  24 MEM_OUT: 0 ACC: 1 OP_REG: 101 COMMAND: JPZ 138@130
+  DEBUG   machine:log           TICK: 132 PC: 131 ADDR:  24 MEM_OUT: 0 ACC: 1 OP_REG: 101 COMMAND: LD 25@131
+  DEBUG   machine:log           TICK: 133 PC: 132 ADDR:  25 MEM_OUT: 101 ACC: 101 OP_REG: 101 COMMAND: OUT 0@132
+  DEBUG   machine:log           TICK: 134 PC: 133 ADDR:  25 MEM_OUT: 101 ACC: 101 OP_REG: 101 COMMAND: LD 24@133
+  DEBUG   machine:log           TICK: 135 PC: 134 ADDR:  24 MEM_OUT: 0 ACC: 0 OP_REG: 101 COMMAND: ST 25@134
+  DEBUG   machine:log           TICK: 136 PC: 135 ADDR:  25 MEM_OUT: 0 ACC: 0 OP_REG: 101 COMMAND: IN 1@135
+  DEBUG   machine:log           TICK: 137 PC: 136 ADDR:  25 MEM_OUT: 0 ACC: 120 OP_REG: 101 COMMAND: ST 25@136
+  DEBUG   machine:log           TICK: 138 PC: 137 ADDR:  25 MEM_OUT: 120 ACC: 120 OP_REG: 101 COMMAND: JP 128@137
+  DEBUG   machine:log           TICK: 139 PC: 128 ADDR:  25 MEM_OUT: 120 ACC: 120 OP_REG: 101 COMMAND: LD 25@128
+  DEBUG   machine:log           TICK: 140 PC: 129 ADDR:  25 MEM_OUT: 120 ACC: 120 OP_REG: 101 COMMAND: NEQ 24@129
+  DEBUG   machine:log           TICK: 143 PC: 130 ADDR:  24 MEM_OUT: 0 ACC: 1 OP_REG: 120 COMMAND: JPZ 138@130
+  DEBUG   machine:log           TICK: 144 PC: 131 ADDR:  24 MEM_OUT: 0 ACC: 1 OP_REG: 120 COMMAND: LD 25@131
+  DEBUG   machine:log           TICK: 145 PC: 132 ADDR:  25 MEM_OUT: 120 ACC: 120 OP_REG: 120 COMMAND: OUT 0@132
+  DEBUG   machine:log           TICK: 146 PC: 133 ADDR:  25 MEM_OUT: 120 ACC: 120 OP_REG: 120 COMMAND: LD 24@133
+  DEBUG   machine:log           TICK: 147 PC: 134 ADDR:  24 MEM_OUT: 0 ACC: 0 OP_REG: 120 COMMAND: ST 25@134
+  DEBUG   machine:log           TICK: 148 PC: 135 ADDR:  25 MEM_OUT: 0 ACC: 0 OP_REG: 120 COMMAND: IN 1@135
+  WARNING machine:simulate      Input buffer is empty
+  DEBUG   machine:simulate      Output buffer: What is your name? Hello, alex
+  DEBUG   machine:simulate      Execution stopped
