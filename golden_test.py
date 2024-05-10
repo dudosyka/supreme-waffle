@@ -1,8 +1,3 @@
-"""Golden тесты транслятора и машины.
-
-Конфигурационнфе файлы: "golden/*_bf.yml"
-"""
-
 import contextlib
 import io
 import logging
