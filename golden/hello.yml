@@ -56,7 +56,7 @@ out_stdout: |
   source LoC: 0 code instr: 49
   ============================================================
   Hello world
-  ------------ ФИО ------------- | alg | LoC | code | инстр. | такт. 
+   ------------ ФИО ------------- | alg | LoC | code | инстр. | такт. 
   Шляпников Александр Дмитриевич | --- | --- | 49 | 39 | 39
 out_log: |
   DEBUG   machine:log           TICK:   1 PC:  10 ADDR:   0 MEM_OUT: Opcode.JP ACC: 0 OP_REG: 0 COMMAND: LIT 72@10

@@ -33,8 +33,8 @@ def program_to_expressions_list(code: str) -> list[ParsedExpression]:
 
 
 class Parser:
-    validators = dict()
-    available_functions = []
+    validators = dict()  # noqa: RUF012
+    available_functions = []  # noqa: RUF012
 
     def __init__(self, name: str, code: str):
         self.name = name
@@ -63,7 +63,7 @@ class Parser:
 
         return "val", int(term), diff
 
-    def unified_parse_loop(self):
+    def unified_parse_loop(self):  # noqa: C901
         i = 0
         while i < len(self.code):
             cut = self.code[i:len(self.code)]

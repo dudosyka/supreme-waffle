@@ -150,12 +150,12 @@ class Translator:
     # Так как метод translate использует для трансляции инструкций на любом уровне
     # требуется флаг top_lvl который выставляется лишь в самом первом вызове
     # Только такие вызовы выполняю поиск инструкций для трансляции процедур и возвращают итоговый результат трансляции
-    def translate(self, source: list[Instruction], top_lvl: bool = False) -> (int, list[Operation]):
+    def translate(self, input_source: list[Instruction], top_lvl: bool = False) -> (int, list[Operation]):  # noqa: C901
         if top_lvl:
             self.memory_pointer += 1
 
             # Firstly find all functions it can be only top-lvl instr
-            for instr in source:
+            for instr in input_source:
                 if instr.name == Term.DEPROC.value:
                     self.operations = []
                     func_name = self.translate_function(instr)
@@ -163,7 +163,7 @@ class Translator:
 
             self.operations = []
 
-        common = list(filter(lambda instr: instr.name != Term.DEPROC.value, source))
+        common = list(filter(lambda instr: instr.name != Term.DEPROC.value, input_source))
 
         for instr in common:
             if instr.name == "set":
