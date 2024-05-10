@@ -46,9 +46,7 @@ class DataPath:
         self.op_register = 0
         self.input_buffer = input_buffer
         self.output_buffer = []
-        self.signals = {
-
-        }
+        self.signals = {}
         self.memory = Memory
 
     def latch_addr(self, sel_addr: Operation = None):
@@ -192,16 +190,13 @@ class ControlUnit:
             data_path_memory_out,
             self.data_path.acc,
             self.data_path.op_register,
-            self.memory.data[self.program_address].to_string()
+            self.memory.data[self.program_address].to_string(),
         )
         logging.debug(state_repr)
 
 
 def simulate(
-        code: list[Operation],
-        input_tokens: list[str],
-        memory_size: int,
-        instruction_limit: int
+    code: list[Operation], input_tokens: list[str], memory_size: int, instruction_limit: int
 ) -> (str, int, int):
     Memory.init(code)
     if len(Memory.data) > memory_size:
@@ -236,12 +231,7 @@ def simulate(
 def main(code_file: str, input_file: str):
     code: list[Operation] = read_code(code_file)
     input_tokens = list(read_file(input_file))
-    output, instr_counter, tick_counter = simulate(
-        code,
-        input_tokens,
-        memory_size=200,
-        instruction_limit=100000
-    )
+    output, instr_counter, tick_counter = simulate(code, input_tokens, memory_size=200, instruction_limit=100000)
 
     print(output)
 

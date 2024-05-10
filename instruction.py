@@ -3,11 +3,24 @@ from __future__ import annotations
 from enum import Enum
 
 available_instructions = [
-    "set", "input", "print", "print_int",
-    "deproc", "if", "loop",
-    "+", "-", "/", "*",
-    "%", "and", "or",
-    "=", "!=", ">", "<",
+    "set",
+    "input",
+    "print",
+    "print_int",
+    "deproc",
+    "if",
+    "loop",
+    "+",
+    "-",
+    "/",
+    "*",
+    "%",
+    "and",
+    "or",
+    "=",
+    "!=",
+    ">",
+    "<",
 ]
 
 

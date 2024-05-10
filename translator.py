@@ -203,17 +203,16 @@ class Translator:
             self.program = [
                 Operation(Opcode.JP, self.memory_pointer),
             ]
-            self.program.extend([Operation(Opcode.NOP)]*(self.memory_pointer - 1))
+            self.program.extend([Operation(Opcode.NOP)] * (self.memory_pointer - 1))
             self.program.extend(self.initialize_block)
             cur = self.memory_pointer
-            for operation in self.program[self.memory_pointer:]:
+            for operation in self.program[self.memory_pointer :]:
                 # Для всех команд с относительной адресацией рассчитываем абсолютные адреса
                 if operation.calc_flag is not None:
                     operation.arg = cur + (operation.arg * operation.calc_flag)
                 cur += 1
 
             self.program.append(Operation(Opcode.HLT))
-
 
             return len(self.program), self.program
 
@@ -225,28 +224,18 @@ def main(source: str, output: str):
     lines = len(input_code.split("\n")) - 1
     # Удаляем комментарии и лишние пробелы
     input_code = re.sub(
-                "\\s+\\)",
-                ")",
-                re.sub(
-                    "\\(\\s+",
-                    "(",
-                    re.sub(
-                        r"--.+$",
-                        "",
-                        input_code,
-                        flags=re.MULTILINE
-                    ),
-                    flags=re.MULTILINE
-                ),
-                flags=re.MULTILINE
-            )
+        "\\s+\\)",
+        ")",
+        re.sub("\\(\\s+", "(", re.sub(r"--.+$", "", input_code, flags=re.MULTILINE), flags=re.MULTILINE),
+        flags=re.MULTILINE,
+    )
 
     # Получаем список экспрешенов верхнего уровня
     expressions = program_to_expressions_list(input_code)
 
     parsed_instructions = list()
     for expression in expressions:
-        instruction = parse_expression(input_code[expression.start_index + 1:expression.end_index])
+        instruction = parse_expression(input_code[expression.start_index + 1 : expression.end_index])
         parsed_instructions.append(instruction)
 
     translator = Translator()
@@ -261,5 +250,3 @@ if __name__ == "__main__":
     assert len(sys.argv) == 3, "Wrong arguments: translator.py <input_file> <target_file>"
     _, source, target = sys.argv
     main(source, target)
-
-

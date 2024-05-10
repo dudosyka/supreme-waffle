@@ -66,24 +66,24 @@ class Parser:
     def unified_parse_loop(self):  # noqa: C901
         i = 0
         while i < len(self.code):
-            cut = self.code[i:len(self.code)]
-            terms = self.code[i:len(self.code)].split()
+            cut = self.code[i : len(self.code)]
+            terms = self.code[i : len(self.code)].split()
             term = terms[0]
             is_opener, operand = self.is_opener(term)
             if is_opener:
                 if self.name == "deproc" and len(self.instr.arguments) == 1:
-                    args = self.code[i:len(self.code)].split(") (")[0][1:]
+                    args = self.code[i : len(self.code)].split(") (")[0][1:]
                     operand = Argument("var", args.split())
-                    i += len(self.code[i:len(self.code)].split(") (")[0]) + 2
+                    i += len(self.code[i : len(self.code)].split(") (")[0]) + 2
                     Parser.available_functions.append(self.instr.arguments[0].value)
                 else:
                     instr_list = []
-                    for parsed in program_to_expressions_list(self.code[i:len(self.code)]):
-                        items = cut[parsed.start_index:parsed.end_index].split()
+                    for parsed in program_to_expressions_list(self.code[i : len(self.code)]):
+                        items = cut[parsed.start_index : parsed.end_index].split()
                         instruction_name = "".join(list(items[0])[1:])
                         parser = Parser(instruction_name, " ".join(items[1:]))
                         instr_list.append(parser.parse())
-                        i += (parsed.end_index + 1)
+                        i += parsed.end_index + 1
 
                     if self.name == "deproc":
                         operand = Argument("instr_list", instr_list)
@@ -91,7 +91,7 @@ class Parser:
                         self.instr.arguments.append(Argument("instr", instr_list[0]))
                         operand = Argument("instr_list", instr_list[1:])
                     else:
-                        for arg in instr_list[0:len(instr_list) - 1]:
+                        for arg in instr_list[0 : len(instr_list) - 1]:
                             operand = Argument("instr", arg)
                             self.instr.arguments.append(operand)
                         operand = Argument("instr", instr_list[len(instr_list) - 1])
@@ -104,8 +104,7 @@ class Parser:
 
     def parse(self) -> Instruction:
         assert (
-                self.name in available_instructions or
-                self.name in Parser.available_functions
+            self.name in available_instructions or self.name in Parser.available_functions
         ), f"Syntax error unknown instruction {self.name}"
 
         self.instr = Instruction(self.name)
