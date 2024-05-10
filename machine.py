@@ -204,6 +204,9 @@ def simulate(
         instruction_limit: int
 ) -> (str, int, int):
     Memory.init(code)
+    if len(Memory.data) > memory_size:
+        logging.critical("Memory limit exceeded")
+        return "", 0, 0
     data_path = DataPath(input_tokens)
     control_unit = ControlUnit(data_path)
     counter = 0
@@ -242,7 +245,7 @@ def main(code_file: str, input_file: str):
 
     print(output)
 
-    print("------------ ФИО ------------- | alg | LoC | code | инстр. | такт. ")
+    print(" ------------ ФИО ------------- | alg | LoC | code | инстр. | такт. ")
     print(f"Шляпников Александр Дмитриевич | --- | --- | {len(code)} | {instr_counter} | {tick_counter}")
 
 
