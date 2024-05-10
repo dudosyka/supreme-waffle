@@ -1,4 +1,4 @@
-JP 15 
+JP 10 
 NOP  
 NOP  
 NOP  
@@ -8,61 +8,42 @@ NOP
 NOP  
 NOP  
 NOP  
-NOP  
-NOP  
-NOP  
-NOP  
-NOP  
-LIT 0 
-ST 3 
-LIT 3 
-ST 6 
-LIT 5 
-ST 8 
-LIT 1 
-ST 13 
-LIT 10 
-ST 14 
-LD 14 
+LIT 72 
 ST 2 
-LD 3 
+LIT 101 
+ST 3 
+LIT 108 
 ST 4 
-LD 3 
+LIT 111 
 ST 5 
-LD 5 
-LW 2 
-JPZ 65 
-LD 5 
-MOD 6 
+LIT 32 
+ST 6 
+LIT 119 
 ST 7 
-LD 7 
-EQ 3 
-JPZ 43 
-LD 4 
-ADD 5 
-ST 4 
-LD 5 
-MOD 8 
+LIT 114 
+ST 8 
+LIT 100 
 ST 9 
+LD 2 
+OUT 0 
+LD 3 
+OUT 0 
+LD 4 
+OUT 0 
+LD 4 
+OUT 0 
+LD 5 
+OUT 0 
+LD 6 
+OUT 0 
+LD 7 
+OUT 0 
+LD 5 
+OUT 0 
+LD 8 
+OUT 0 
+LD 4 
+OUT 0 
 LD 9 
-EQ 3 
-ST 10 
-LD 5 
-MOD 6 
-ST 11 
-LD 11 
-NEQ 3 
-ST 12 
-LD 10 
-AND 12 
-JPZ 61 
-LD 4 
-ADD 5 
-ST 4 
-LD 5 
-ADD 13 
-ST 5 
-JP 31 
-LD 4 
-OUT_PURE 0 
+OUT 0 
 HLT  

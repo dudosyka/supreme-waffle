@@ -32,8 +32,6 @@ out_stdout: |
   source LoC: 4 code instr: 21
   ============================================================
   foo
-   ------------ ФИО ------------- | alg | LoC | code | инстр. | такт. 
-  Шляпников Александр Дмитриевич | --- | --- | 21 | 34 | 40
 out_log: |
   DEBUG   machine:log           TICK:   1 PC:   4 ADDR:   0 MEM_OUT: Opcode.JP ACC: 0 OP_REG: 0 COMMAND: LIT 0@4
   DEBUG   machine:log           TICK:   2 PC:   5 ADDR:   0 MEM_OUT: Opcode.JP ACC: 0 OP_REG: 0 COMMAND: ST 2@5

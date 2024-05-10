@@ -89,8 +89,6 @@ out_stdout: |
   source LoC: 14 code instr: 68
   ============================================================
   233168
-   ------------ ФИО ------------- | alg | LoC | code | инстр. | такт. 
-  Шляпников Александр Дмитриевич | --- | --- | 68 | 29423 | 48359
 out_log: |
   DEBUG   machine:log           TICK:   1 PC:  15 ADDR:   0 MEM_OUT: Opcode.JP ACC: 0 OP_REG: 0 COMMAND: LIT 0@15
   DEBUG   machine:log           TICK:   2 PC:  16 ADDR:   0 MEM_OUT: Opcode.JP ACC: 0 OP_REG: 0 COMMAND: ST 3@16

@@ -235,9 +235,6 @@ def main(code_file: str, input_file: str):
 
     print(output)
 
-    print(" ------------ ФИО ------------- | alg | LoC | code | инстр. | такт. ")
-    print(f"Шляпников Александр Дмитриевич | --- | --- | {len(code)} | {instr_counter} | {tick_counter}")
-
 
 if __name__ == "__main__":
     assert len(sys.argv) == 3, "Wrong arguments: translator.py <input_file> <target_file>"

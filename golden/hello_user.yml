@@ -152,8 +152,6 @@ out_stdout: |
   source LoC: 6 code instr: 139
   ============================================================
   What is your name? Hello, alex
-   ------------ ФИО ------------- | alg | LoC | code | инстр. | такт. 
-  Шляпников Александр Дмитриевич | --- | --- | 139 | 140 | 148
 out_log: |
   DEBUG   machine:log           TICK:   1 PC:  26 ADDR:   0 MEM_OUT: Opcode.JP ACC: 0 OP_REG: 0 COMMAND: LIT 87@26
   DEBUG   machine:log           TICK:   2 PC:  27 ADDR:   0 MEM_OUT: Opcode.JP ACC: 87 OP_REG: 0 COMMAND: ST 2@27
