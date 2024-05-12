@@ -90,7 +90,7 @@ world
 
 Область видимости у всех переменных глобальная, в том числе у аргументов процедур. 
 
-Для иллюстрации работы транслятора с правилом "everything is expression" был написан тест [expression_common.yml](./golden/expression_common.yml)
+Для иллюстрации работы транслятора с правилом "everything is expression" был написан тест [expression_common.yml](https://github.com/dudosyka/supreme-waffle/blob/master/golden/expression_common.yml)
 
 ```
   (print_int (set x 1))
@@ -336,14 +336,26 @@ N + M + 1: MEM ... | <-- Память строковых переменных \ 
 
 ## Транслятор
 
-Интерфейс командной строки: `translator.py <input_file> <target_file>`
+Интерфейс командной строки: 
+```
+Usage: translator.py [OPTIONS] SOURCE_CODE MACHINE_CODE
 
-Реализовано в модуле: [translator](translator.py)
+  Translator run control interface
+
+  SOURCE_CODE - Path to source code file
+
+  MACHINE_CODE - Path to output file, where machine code will be placed
+
+Options:
+  --help  Show this message and exit.
+```
+
+Реализовано в модуле: [translator](https://github.com/dudosyka/supreme-waffle/blob/master/translator.py)
 
 Этапы трансляции (функция `main`):
 
 1. Очистка комментариев и лишних пробелов
-2. Парсинг исходного кода (см. [parser](parser.py)) и преобразование его в дерево объектов Instruction (см. [instruction](instruction.py))
+2. Парсинг исходного кода (см. [parser](https://github.com/dudosyka/supreme-waffle/blob/master/golden/parser.py)) и преобразование его в дерево объектов Instruction (см. [instruction](https://github.com/dudosyka/supreme-waffle/blob/master/instruction.py))
 3. Использование дерева для генерации машинного кода.
 
 Правила генерации машинного кода:
@@ -374,7 +386,7 @@ Options:
 
 ```
 
-Реализовано в модуле: [machine](machine.py).
+Реализовано в модуле: [machine](https://github.com/dudosyka/supreme-waffle/blob/master/golden/machine.py).
 
 ### DataPath
 
@@ -417,8 +429,8 @@ Options:
 - `program_address` - регистр указатель на исполняемую инструкцию в памяти
 
 - Hardwired (реализовано полностью на Python).
-- Метод `decode_and_execute_instruction` моделирует выполнение полного цикла инструкции (1-3 такта процессора).
-- Counter реализован неявно внутри метода `decode_and_execute_instruction`
+- Метод `decode_and_execute_instruction` моделирует выполнение полного цикла инструкции.
+- Counter реализован внутри метода `decode_and_execute_instruction` путем рекурсивных вызовов
 
 Сигнал:
 
@@ -445,23 +457,23 @@ Options:
 
 Тестирование выполняется при помощи golden test-ов.
 
-Тесты реализованы в: [golden_test.py](golden_test.py). 
-и в: [prob1_golden_test.py](prob1_golden_test.py). 
+Тесты реализованы в: [golden_test.py](https://github.com/dudosyka/supreme-waffle/blob/master/golden_test.py). 
+и в: [prob1_golden_test.py](https://github.com/dudosyka/supreme-waffle/blob/master/prob1_golden_test.py). 
 
 Отдельный файл тестов для prob1 так как лог его работы довольно большой и внутри теста machine.py запускается с аргументами, который ограничиваю вывод для этой программы
 
 Конфигурации:
-- [golden/cat_common.yml](golden/cat_common.yml)
-- [golden/hello_common.yml](golden/hello_common.yml)
-- [golden/hello_user_common.yml](golden/hello_user_common.yml)
-- [golden/prob1.yml](golden/prob1.yml)
-- [golden/expression_common.yml](golden/expression_common.yml)
+- [golden/cat_common.yml](https://github.com/dudosyka/supreme-waffle/blob/master/golden/cat_common.yml)
+- [golden/hello_common.yml](https://github.com/dudosyka/supreme-waffle/blob/master/golden/hello_common.yml)
+- [golden/hello_user_common.yml](https://github.com/dudosyka/supreme-waffle/blob/master/golden/hello_user_common.yml)
+- [golden/prob1.yml](https://github.com/dudosyka/supreme-waffle/blob/master/golden/prob1.yml)
+- [golden/expression_common.yml](https://github.com/dudosyka/supreme-waffle/blob/master/golden/expression_common.yml)
 
 Запустить тесты: `poetry run pytest . -v`
 
 Обновить конфигурацию golden tests:  `poetry run pytest . -v --update-goldens`
 
-CI при помощи Github Action: [.github/workflows/lisp.yml](.github/workflows/lisp.yml)
+CI при помощи Github Action: [.github/workflows/lisp.yml](https://github.com/dudosyka/supreme-waffle/blob/master/.github/workflows/lisp.yml)
 
 Пример использования и журнал работы процессора на примере `hello user`:
 
