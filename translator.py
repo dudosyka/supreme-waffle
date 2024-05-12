@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import re
-import sys
 from parser import parse_expression, program_to_expressions_list
 
 import click
@@ -60,17 +59,17 @@ class Translator:
 
     def add_memory_cell(self, value: int = 0):
         """
-            Выделяет в памяти переменных и констант ячейку и заполняет ее значением
+        Выделяет в памяти переменных и констант ячейку и заполняет ее значением
         """
         self.memory[self.memory_pointer] = value
         self.memory_pointer += 1
 
     def translate_procedure(self, instruction: Instruction) -> str:
         """
-            Выполняет транслцию процедуры в набор инструкций, выделяет в памяти ячейки под аргументы
+        Выполняет транслцию процедуры в набор инструкций, выделяет в памяти ячейки под аргументы
 
-            Поддержка вызовов на уровне машинного кода отсутствует поэтому транслированное тело процедуры
-            сохраняется и при нахождении инструкции вызова внутри исходного кода тело процедуры инлайниться
+        Поддержка вызовов на уровне машинного кода отсутствует поэтому транслированное тело процедуры
+        сохраняется и при нахождении инструкции вызова внутри исходного кода тело процедуры инлайниться
         """
         func = Procedure()
         # Firstly map local variables if they exist to memory
@@ -85,8 +84,8 @@ class Translator:
 
     def translate_operator(self, instruction: Instruction) -> list[MemoryCell]:
         """
-            Выполняет трансляцию инструкций являющихся математическими операторами
-            В случае необходимости сам вызывает методы трансляции для операндов не являющихся константами
+        Выполняет трансляцию инструкций являющихся математическими операторами
+        В случае необходимости сам вызывает методы трансляции для операндов не являющихся константами
         """
         simplified_operands: list[int] = []
         operations = []
@@ -113,9 +112,9 @@ class Translator:
 
     def translate_conditional_instruction(self, instruction: Instruction, ignore_next_jp: int = 0):
         """
-            Выполняет трансляцию управляющих инструкций, таких как циклы и условия
-            Сам вызывает метод трансляции условия перехода и вставляет необходимые джампы, кроме
-            джампа в начало для циклов
+        Выполняет трансляцию управляющих инструкций, таких как циклы и условия
+        Сам вызывает метод трансляции условия перехода и вставляет необходимые джампы, кроме
+        джампа в начало для циклов
         """
         self.operations.extend(self.translate_operator(instruction.arguments[0].value))
         start_with = len(self.operations)
@@ -126,20 +125,20 @@ class Translator:
         self.translate(instruction.arguments[1].value)
         body_end = len(self.operations)
         # Подставляем относительный адрес
-        self.operations[start_with].arg = body_end - start_with + ignore_next_jp
+        self.operations[start_with].args[0] = body_end - start_with + ignore_next_jp
 
     def get_const_pointer(self, value: any) -> int:
         """
-            Метод для сохранения и получения указателей на константы в памяти
-            Если константа уже была сохранена возвращается указатель на нее, если
-            такой константы ещё не было она записывается в память и возвращается указатель на нее
+        Метод для сохранения и получения указателей на константы в памяти
+        Если константа уже была сохранена возвращается указатель на нее, если
+        такой константы ещё не было она записывается в память и возвращается указатель на нее
         """
         if self.consts.__contains__(value):
             return self.consts[value]
 
         mem_val = value
         if isinstance(value, str):
-            pointer = self.str_memory_pointer + (2 ** 31)
+            pointer = self.str_memory_pointer + (2**31)
             str_value = value[1 : len(value) - 1]
             str_value = str_value.replace("\\s", " ")
             str_value = str_value.replace("\\n", "\n")
@@ -161,9 +160,9 @@ class Translator:
 
     def translate_arg(self, argument: Argument) -> None:
         """
-            Выполняет трансляюцию аргументов для других операций
-            Инструкцию для которых выполняется трансляцию аргументов, основывается на том,
-            что значение требуемого аргумента загрузится в аккумулятор
+        Выполняет трансляюцию аргументов для других операций
+        Инструкцию для которых выполняется трансляцию аргументов, основывается на том,
+        что значение требуемого аргумента загрузится в аккумулятор
         """
         if argument.type == "instr":
             if argument.value.name in self.op_type:
@@ -178,10 +177,10 @@ class Translator:
 
     def create_or_update_var(self, name: str, value: Argument) -> None:
         """
-            Выполняет транслцию инструкций управления переменными
-            Если требуется создать переменную под нее выделяется память
-            и прописывается инициализирующее значение если оно было задано
-            Получение инициализационного значение происходит при помощи метода translate arg
+        Выполняет транслцию инструкций управления переменными
+        Если требуется создать переменную под нее выделяется память
+        и прописывается инициализирующее значение если оно было задано
+        Получение инициализационного значение происходит при помощи метода translate arg
         """
         self.translate_arg(value)
 
@@ -194,14 +193,14 @@ class Translator:
 
     def create_str_var(self, name: str) -> int:
         """
-            Управляет создание иключительно строковых переменных так как метод их хранения
-            отличается от остальных.
-            При этом в памяти переменных инициализируется ячейка в которую помещается указатель на созданную строку
-            Инструкцию работающие со строками получают в качестве аргумента ячейку с указателем на строку
+        Управляет создание иключительно строковых переменных так как метод их хранения
+        отличается от остальных.
+        При этом в памяти переменных инициализируется ячейка в которую помещается указатель на созданную строку
+        Инструкцию работающие со строками получают в качестве аргумента ячейку с указателем на строку
 
-            Максимальная длина строки в данной реализации ограничена до 64 символов
+        Максимальная длина строки в данной реализации ограничена до 64 символов
         """
-        pointer = self.str_memory_pointer + (2 ** 31)
+        pointer = self.str_memory_pointer + (2**31)
         self.str_memory[self.str_memory_pointer] = 0
         for i in range(64):
             self.str_memory_pointer += 1
@@ -215,10 +214,10 @@ class Translator:
 
     def translate(self, input_source: list[Instruction], top_lvl: bool = False) -> (int, list[MemoryCell]):  # noqa: C901
         """
-            Основной цикл трансляиии инструкций
-            Так как он используется всеми операциями, то для определения первичного вызова используется флаг top_lvl
-            В случае установки этого флага будет выполнен поиск и трансляция процедур и на выход метода будет подан массив
-            с ячейками памяти
+        Основной цикл трансляиии инструкций
+        Так как он используется всеми операциями, то для определения первичного вызова используется флаг top_lvl
+        В случае установки этого флага будет выполнен поиск и трансляция процедур и на выход метода будет подан массив
+        с ячейками памяти
         """
         if top_lvl:
             for instr in input_source:
@@ -252,19 +251,19 @@ class Translator:
             if instr.name == "print":
                 for arg in instr.arguments:
                     self.translate_arg(arg)
-                    self.operations.append(MemoryCell(Opcode.OUT))
+                    self.operations.append(MemoryCell(Opcode.OUT, 0))
             if instr.name == "print_int":
                 for arg in instr.arguments:
                     self.translate_arg(arg)
-                    self.operations.append(MemoryCell(Opcode.OUT_PURE))
+                    self.operations.append(MemoryCell(Opcode.OUT_PURE, 0))
             if instr.name == "input":
                 if len(instr.arguments) > 0:
                     arg = instr.arguments[0]
                     assert arg.type == "var", "input argument must be var"
                     pointer = self.create_str_var(arg.value)
-                    self.operations.append(MemoryCell(Opcode.IN, pointer))
+                    self.operations.append(MemoryCell(Opcode.IN, [1, pointer]))
                 else:
-                    self.operations.append(MemoryCell(Opcode.IN))
+                    self.operations.append(MemoryCell(Opcode.IN, [1, None]))
 
         if top_lvl:
             self.code = [
@@ -280,7 +279,7 @@ class Translator:
             for operation in self.code[self.memory_pointer :]:
                 # Для всех команд с относительной адресацией рассчитываем абсолютные адреса
                 if operation.calc_flag is not None:
-                    operation.arg = cur + (operation.arg * operation.calc_flag)
+                    operation.args[0] = cur + (operation.args[0] * operation.calc_flag)
                 cur += 1
 
             self.code.append(MemoryCell(Opcode.HLT))
@@ -316,7 +315,7 @@ def main(source: str, output: str):
     translator = Translator()
 
     amount, operations = translator.translate(parsed_instructions, True)
-    print("source LoC:", lines+1, "code instr:", amount)
+    print("source LoC:", lines + 1, "code instr:", amount)
 
     write_code(output, operations)
 
@@ -326,11 +325,11 @@ def main(source: str, output: str):
 @click.argument("machine-code", type=click.Path(exists=True))
 def start(source_code: str, machine_code: str):
     """
-        Translator run control interface
+    Translator run control interface
 
-        SOURCE_CODE - Path to source code file
+    SOURCE_CODE - Path to source code file
 
-        MACHINE_CODE - Path to output file, where machine code will be placed
+    MACHINE_CODE - Path to output file, where machine code will be placed
     """
     main(source_code, machine_code)
 

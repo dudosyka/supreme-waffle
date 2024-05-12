@@ -7,10 +7,11 @@ from io_helper import read_file, write_file
 
 class Opcode(str, Enum):
     """
-        Перечисление всех доступных команд
-        Все опкоды кроме MEM являются инструкциями,
-        При инициализации памяти MEM парсится в числовую ячейку
+    Перечисление всех доступных команд
+    Все опкоды кроме MEM являются инструкциями,
+    При инициализации памяти MEM парсится в числовую ячейку
     """
+
     LD = "load"
     ST = "store"
     ADD = "add"
@@ -35,18 +36,27 @@ class Opcode(str, Enum):
 
 class MemoryCell:
     """
-        Класс описывающий объект памяти
+    Класс описывающий объект памяти
     """
-    def __init__(self, code: Opcode, arg: int | None = None, calc_flag: int | None = None, addr: int | None = None):
+
+    def __init__(
+        self, code: Opcode, args: int | list[int] | None = None, calc_flag: int | None = None, addr: int | None = None
+    ):
         self.code: Opcode = code
-        self.arg: int | None = arg
+        self.args: list[int] | None = args
+        if isinstance(args, int):
+            self.args = [args]
+        elif isinstance(args, list):
+            self.args = args
         self.calc_flag: int | None = calc_flag
         self.addr: int | None = addr
 
     def to_string(self) -> str:
         res = f"{self.code.name}"
-        if self.arg is not None:
-            res += f" {self.arg!s}"
+        if self.args is not None:
+            for arg in self.args:
+                if arg is not None:
+                    res += f" {arg!s}"
         if self.addr is not None:
             res += f" @{self.addr}"
 
@@ -92,17 +102,14 @@ def read_code(filename: str) -> list[MemoryCell]:
     for i in range(len(lines)):
         line = lines[i]
         split = line.split()
-        if len(split) == 3:
-            opcode_str, arg_str, pointer_arg_str = split
-            arg = int(arg_str)
-        elif len(split) == 2:
-            opcode_str, arg_str = split
-            arg = int(arg_str)
+        if len(split) >= 2:
+            opcode_str = split[0]
+            args = list(map(int, split[1:]))
         elif len(split) == 1:
             opcode_str = split[0]
-            arg = None
+            args = None
         else:
             continue
-        operations.append(MemoryCell(str2opcode[opcode_str], arg, addr=i))
+        operations.append(MemoryCell(str2opcode[opcode_str], args, addr=i))
 
     return operations

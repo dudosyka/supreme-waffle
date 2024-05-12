@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import logging
-import sys
 
 import click
 from io_helper import read_file
@@ -10,10 +9,11 @@ from isa import MemoryCell, Opcode, read_code
 
 class Memory:
     """
-         Объект памяти в котором хранятся ячейки с инструкциями и данными
-         Инициализируется единожды при старте процессора
-         Ссылки на него хранятся в ControlUnit и DataPath
+    Объект памяти в котором хранятся ячейки с инструкциями и данными
+    Инициализируется единожды при старте процессора
+    Ссылки на него хранятся в ControlUnit и DataPath
     """
+
     data: list[MemoryCell | int]
 
     @staticmethod
@@ -21,8 +21,10 @@ class Memory:
         Memory.data = []
         for operation in code:
             if operation.code is Opcode.MEM:
-                assert -(2**32) <= operation.arg <= (2**32 - 1), "memory cell is out of bound: {}".format(operation.arg)
-                Memory.data.append(operation.arg)
+                assert -(2**32) <= operation.args[0] <= (2**32 - 1), "memory cell is out of bound: {}".format(
+                    operation.args[0]
+                )
+                Memory.data.append(operation.args[0])
             else:
                 Memory.data.append(operation)
         Memory.data.extend([0] * (limit - len(code)))
@@ -52,44 +54,46 @@ alu_op_2_operation = {
 
 class DataPath:
     """
-        Класс DataPath
-        memory - ссылка на объект Memory память компьютера
-        addr_register - регистр текущего адреса для Memory
-        acc - аккумулятор
-        op_register - регистр для сохранения второго операнда при работе с АЛУ
-        input_buffer - буффер имитирующий устройство ввода в процессор
-        output_buffer - буффер имитирующий устройство вывода из процессора
-        buffer_register - буфферный регистр используется при работе со строками
+    Класс DataPath
+    memory - ссылка на объект Memory память компьютера
+    addr_register - регистр текущего адреса для Memory
+    acc - аккумулятор
+    op_register - регистр для сохранения второго операнда при работе с АЛУ
+    input_buffer - буффер имитирующий устройство ввода в процессор
+    output_buffer - буффер имитирующий устройство вывода из процессора
+    buffer_register - буфферный регистр используется при работе со строками
     """
+
     def __init__(self, input_buffer: list):
         self.memory = Memory
         self.addr_register = 0
         self.acc = 0
         self.op_register = 0
-        self.input_buffer = input_buffer
-        self.output_buffer = []
+        self.ports: dict[int, list[str]] = dict()
+        self.ports[1] = input_buffer  # Input buffer
+        self.ports[0] = []  # Output buffer
         self.buffer_register = 0
 
     def latch_addr(self, sel_addr: int | None = None):
-        """     +<----------+
-                |           |
-            +-----+     +------+
-sel_addr -->| MUX | --> | addr |
-            +-----+     +------+
-            Сигнал защёлкивания регистра адреса, может защёлкнуть либо
-            * Новый адрес из сигнала sel_addr
-            * Свое старое значение (без изменений)
+        """+<----------+
+                        |           |
+                    +-----+     +------+
+        sel_addr -->| MUX | --> | addr |
+                    +-----+     +------+
+                    Сигнал защёлкивания регистра адреса, может защёлкнуть либо
+                    * Новый адрес из сигнала sel_addr
+                    * Свое старое значение (без изменений)
         """
         if sel_addr is not None:
             self.addr_register = sel_addr
 
     def latch_acc(self, sel_acc: MemoryCell | int = None):
         """
-            Защёлка аккумулятора работает, может защёлкнуть либо
-            * Значение текущей ячейки памяти
-            * Константу
-            * Результат операции
-            * Значение из устройства ввода
+        Защёлка аккумулятора работает, может защёлкнуть либо
+        * Значение текущей ячейки памяти
+        * Константу
+        * Результат операции
+        * Значение из устройства ввода
         """
         if sel_acc is None:
             self.acc = self.memory.data[self.addr_register]
@@ -109,10 +113,10 @@ sel_addr -->| MUX | --> | addr |
             return
 
         if sel_acc.code == Opcode.IN:
-            if len(self.input_buffer) == 0:
+            if len(self.ports[sel_acc.args[0]]) == 0:
                 self.acc = 0
                 return
-            symbol = self.input_buffer.pop(0)
+            symbol = self.ports[sel_acc.args[0]].pop(0)
             symbol_code = ord(symbol)
             assert -(2**32) <= symbol_code <= (2**32 - 1), "input token is out of bound: {}".format(symbol_code)
             self.acc = symbol_code
@@ -120,47 +124,47 @@ sel_addr -->| MUX | --> | addr |
 
     def latch_op(self):
         """
-            Защёлка регистра операнда
+        Защёлка регистра операнда
         """
         self.op_register = self.acc
 
     def latch_br(self):
         """
-            Защёлка буферного регистра
+        Защёлка буферного регистра
         """
         self.buffer_register = self.acc
 
     def signal_wr(self):
         """
-            Сигнал записи в память значения из аккумулятора по текущему адресу
+        Сигнал записи в память значения из аккумулятора по текущему адресу
         """
         self.memory.data[self.addr_register] = self.acc
 
-    def signal_output(self, pure: bool = False):
+    def signal_output(self, port: int, pure: bool = False):
         """
-            Сигнал записи в устройство вывода значения из аккумулятора
+        Сигнал записи в устройство вывода значения из аккумулятора
         """
         if pure:
-            self.output_buffer.append(str(self.acc))
+            self.ports[port].append(str(self.acc))
             return
         symbol = chr(self.acc)
-        self.output_buffer.append(symbol)
+        self.ports[port].append(symbol)
 
     def zero(self):
         """
-            Сигнал означающий что в аккумуляторе 0
+        Сигнал означающий что в аккумуляторе 0
         """
         return self.acc == 0
 
     def br(self):
         """
-            Сигнал с текущим значением буферного регистра
+        Сигнал с текущим значением буферного регистра
         """
         return self.buffer_register
 
     def acc_val(self):
         """
-            Сигнал с текущим значением аккумулятора регистра
+        Сигнал с текущим значением аккумулятора регистра
         """
         return self.acc
 
@@ -180,26 +184,26 @@ class ControlUnit:
 
     def signal_latch_program_address(self, operation: MemoryCell = None):
         """
-            Защёлка program_address регистра, может защёлкнуть
-            * Текущий адрес + 1
-            * Адрес из инструкцию управления
+        Защёлка program_address регистра, может защёлкнуть
+        * Текущий адрес + 1
+        * Адрес из инструкцию управления
         """
         if operation is not None and operation.code in [Opcode.JP, Opcode.JPZ]:
-            self.program_address = operation.arg
+            self.program_address = operation.args[0]
         else:
             self.program_address += 1
 
     def signal_latch_buffer_register(self, val: int):
         """
-            Защёлка буфферного регистра
+        Защёлка буфферного регистра
         """
         self.buffer_register = val
 
     def decode_and_execute_control_flow_instruction(self, operation: MemoryCell):
         """
-            Декодирование и исполнение инструкций управления
-            HLT - остановка тактового генератора
-            JP, JPZ условный и безусловный переходы
+        Декодирование и исполнение инструкций управления
+        HLT - остановка тактового генератора
+        JP, JPZ условный и безусловный переходы
         """
         if operation.code == Opcode.HLT:
             raise StopMachineError()
@@ -213,10 +217,10 @@ class ControlUnit:
     @staticmethod
     def translate_pointer(operation: int) -> int | None:
         """
-            Выполняет вычисление указателя
-            Указатели можно отличить от остальных ячеек в памяти по старшему биту, так как ячейки 32 битные
-            То в случае если старший 32 бит = 1, то это указатель и указывает он на ячейку по адресу который
-            сохранен в оставшихся 31 битах
+        Выполняет вычисление указателя
+        Указатели можно отличить от остальных ячеек в памяти по старшему биту, так как ячейки 32 битные
+        То в случае если старший 32 бит = 1, то это указатель и указывает он на ячейку по адресу который
+        сохранен в оставшихся 31 битах
         """
         pointer = operation - (2**31)
         if pointer < 0:
@@ -226,16 +230,16 @@ class ControlUnit:
 
     def execute_out_instruction(self, operation: MemoryCell):
         """
-            Выполняет инструкции для работы с устройством вывода
-            OUT_PURE команда отправляет текущее значение аккумулятора в устройство вывода без конвертации в ASCII символ
-            OUT команда
-             * если текущее значение аккумулятора - указатель, декодирует его и запускает цикл на основе counter для
-             печати всей строки посимвольно в поток вывода
-             * если значение аккумулятора - не указатель, выполняется его отправка в поток вывода с предварительной
-             конвертацией в символ ASCII
+        Выполняет инструкции для работы с устройством вывода
+        OUT_PURE команда отправляет текущее значение аккумулятора в устройство вывода без конвертации в ASCII символ
+        OUT команда
+         * если текущее значение аккумулятора - указатель, декодирует его и запускает цикл на основе counter для
+         печати всей строки посимвольно в поток вывода
+         * если значение аккумулятора - не указатель, выполняется его отправка в поток вывода с предварительной
+         конвертацией в символ ASCII
         """
         if operation.code == Opcode.OUT_PURE:
-            self.data_path.signal_output(pure=True)
+            self.data_path.signal_output(pure=True, port=operation.args[0])
             self.signal_latch_program_address(operation)
             self.tick()
             return
@@ -243,7 +247,7 @@ class ControlUnit:
         is_pointer = self.translate_pointer(self.data_path.acc_val())
         if self.counter == 0:
             if is_pointer is None:
-                self.data_path.signal_output()
+                self.data_path.signal_output(operation.args[0])
                 self.signal_latch_program_address(operation)
                 self.tick()
                 return
@@ -266,7 +270,7 @@ class ControlUnit:
             self.data_path.latch_acc()
             self.tick()
 
-            self.data_path.signal_output()
+            self.data_path.signal_output(operation.args[0])
             self.counter += 1
             self.execute_out_instruction(operation)
 
@@ -279,20 +283,22 @@ class ControlUnit:
 
     def execute_in_instruction(self, operation: MemoryCell):
         """
-            Выполняет инструкции для работы с устройством ввода
-            IN команда
-             * если аргумента нет загружает один символ потока ввода в аккумулятор
-             * если аргумент передан и это не указатель выкидывается эксепшен
-             * если аргумент указатель начинается посимвольное чтение из потока ввода в указанную область памяти
+        Выполняет инструкции для работы с устройством ввода
+        IN <port> [var] команда
+         * если аргумента [var] нет загружает один символ потока ввода в аккумулятор
+         * если аргумент [var] передан и это не указатель выкидывается эксепшен
+         * если аргумент [var] указатель начинается посимвольное чтение из потока ввода в указанную область памяти
         """
-        if operation.arg is None:
+        if len(operation.args) == 1:
             self.data_path.latch_acc(sel_acc=operation)
             self.signal_latch_program_address(operation)
             self.tick()
             return
 
+        pointer_addr = operation.args[1]
+
         if self.counter == 0:
-            self.data_path.latch_addr(sel_addr=operation.arg)
+            self.data_path.latch_addr(sel_addr=pointer_addr)
             self.tick()
 
             self.data_path.latch_acc()
@@ -346,9 +352,9 @@ class ControlUnit:
 
     def decode_and_execute_instruction(self):
         """
-            Декодирование и исполнение всех инструкций
-            Если вместо инструкции была прочитана память данных будет выброшено исключение, то же самое
-            произойдет если инструкция была не определена
+        Декодирование и исполнение всех инструкций
+        Если вместо инструкции была прочитана память данных будет выброшено исключение, то же самое
+        произойдет если инструкция была не определена
         """
         operation = self.memory.data[self.program_address]
 
@@ -362,7 +368,7 @@ class ControlUnit:
 
         if operation.code in alu_op_2_operation.keys():
             self.data_path.latch_op()
-            self.data_path.latch_addr(sel_addr=operation.arg)
+            self.data_path.latch_addr(sel_addr=operation.args[0])
             self.tick()
 
             self.data_path.latch_acc()
@@ -374,7 +380,7 @@ class ControlUnit:
             return
 
         if operation.code == Opcode.LD:
-            self.data_path.latch_addr(sel_addr=operation.arg)
+            self.data_path.latch_addr(sel_addr=operation.args[0])
             self.tick()
 
             self.data_path.latch_acc()
@@ -383,7 +389,7 @@ class ControlUnit:
             return
 
         if operation.code == Opcode.ST:
-            self.data_path.latch_addr(sel_addr=operation.arg)
+            self.data_path.latch_addr(sel_addr=operation.args[0])
             self.tick()
 
             self.data_path.signal_wr()
@@ -424,21 +430,17 @@ class ControlUnit:
 class LogSettings:
     currently_logged_instruction: int = 0
     """
-        Объект настройки логирования
+        Объект нacтpoйки логирования
         verbose_instr - сколько инструкций нужно подробно логировать, после достижения счетчиком этого значения
         подробное логирование прекратиться
-        log_output_path - если значение установлено логирование будет идти в файл, а не в стандартный поток вывода.
+        log_output_path - если значение установлено логирование будет идти в файл, a не в стандартный поток вывода.
         level - уровень логирования
     """
 
-    def __init__(self, verbose_instr: int | None = None, log_output_path: str | None = None, level: str = "DEBUG") -> None:
-        level2int = {
-            "DEBUG": 10,
-            "INFO": 20,
-            "WARN": 30,
-            "ERROR": 40,
-            "CRITICAL": 50
-        }
+    def __init__(
+        self, verbose_instr: int | None = None, log_output_path: str | None = None, level: str = "DEBUG"
+    ) -> None:
+        level2int = {"DEBUG": 10, "INFO": 20, "WARN": 30, "ERROR": 40, "CRITICAL": 50}
         self.verbose_instr = verbose_instr
         self.log_output_path = log_output_path
         if level not in level2int.keys():
@@ -459,13 +461,13 @@ def simulate(
     log_settings: LogSettings,
 ) -> (str, int, int):
     """
-        Метод симуляции работы процессора
-        На выход передает
-        * output_buffer
-        * instruction counter
-        * tick_counter
+    Метод симуляции работы процессора
+    На выход передает
+    * output_buffer
+    * instruction counter
+    * tick_counter
 
-        Инициализирует Memory, ControlUnit, DataPath и выполняет последовательное исполнение инструкций
+    Инициализирует Memory, ControlUnit, DataPath и выполняет последовательное исполнение инструкций
     """
     Memory.init(code, memory_size)
     if len(Memory.data) > memory_size:
@@ -495,10 +497,10 @@ def simulate(
 
     logging.debug(f"Total instructions: {control_unit.instr_counter}")
     logging.debug(f"Total ticks: {control_unit.tick_counter}")
-    logging.debug(f"Output buffer: {''.join(control_unit.data_path.output_buffer)}")
+    logging.debug(f"Output buffer: {''.join(control_unit.data_path.ports[0])}")
     logging.debug("Execution stopped")
 
-    return "".join(control_unit.data_path.output_buffer), control_unit.instr_counter, control_unit.tick_counter
+    return "".join(control_unit.data_path.ports[0]), control_unit.instr_counter, control_unit.tick_counter
 
 
 def main(code_file: str, input_file: str, log_settings: LogSettings = LogSettings()):
@@ -513,20 +515,22 @@ def main(code_file: str, input_file: str, log_settings: LogSettings = LogSetting
 
 @click.command()
 @click.option("--log-output-file", help="File to place machine working logs; Default: Not set")
-@click.option("--verbose-instr", help="Amount of instructions to be verbose logged; Default: Not set", default=None, type=int)
+@click.option(
+    "--verbose-instr", help="Amount of instructions to be verbose logged; Default: Not set", default=None, type=int
+)
 @click.option("--logging-level", help="DEBUG, INFO, WARN, ERROR, CRITICAL; Default: DEBUG", default="DEBUG", type=str)
 @click.argument("code", type=click.Path(exists=True))
 @click.argument("input_buffer", type=click.Path(exists=True))
-def start(log_output_file: str | None, verbose_instr: int | None, code_file: str, input_buffer: str, logging_level: str):
+def start(log_output_file: str | None, verbose_instr: int | None, code: str, input_buffer: str, logging_level: str):
     """
-        Simulator run control interface
+    Simulator run control interface
 
-        CODE - Machine code file path
+    CODE - Machine code file path
 
-        INPUT_BUFFER - Path to file which will emulate input buffer
+    INPUT_BUFFER - Path to file which will emulate input buffer
     """
     log_settings = LogSettings(verbose_instr, log_output_file, logging_level)
-    main(code_file, input_buffer, log_settings)
+    main(code, input_buffer, log_settings)
 
 
 if __name__ == "__main__":

@@ -72,7 +72,7 @@ out_code: |
   ST 4
   JP 20
   LD 3
-  OUT_PURE
+  OUT_PURE 0
   HLT
 out_stdout: |
   source LoC: 15 code instr: 44
