@@ -93,7 +93,10 @@ class Translator:
         for i in range(len(instruction.arguments)):
             argument = instruction.arguments[i]
             if argument.type == "instr":
-                operations.extend(self.translate_operator(argument.value))
+                if argument.value.name in self.op_type:
+                    operations.extend(self.translate_operator(argument.value))
+                else:
+                    self.translate([argument.value])
                 operations.append(MemoryCell(Opcode.ST, self.memory_pointer))
                 simplified_operands.append(self.memory_pointer)
                 self.add_memory_cell()
@@ -123,6 +126,8 @@ class Translator:
         # флаг calc_flag означает что абсолютный адрес будет вычислен на последнем этапе
         self.operations.append(MemoryCell(Opcode.JPZ, 0, 1))
         self.translate(instruction.arguments[1].value)
+        if len(instruction.arguments) == 3:
+            self.translate_arg(instruction.arguments[2])
         body_end = len(self.operations)
         # Подставляем относительный адрес
         self.operations[start_with].args[0] = body_end - start_with + ignore_next_jp
@@ -165,10 +170,7 @@ class Translator:
         что значение требуемого аргумента загрузится в аккумулятор
         """
         if argument.type == "instr":
-            if argument.value.name in self.op_type:
-                self.operations.extend(self.translate_operator(argument.value))
-            if argument.value.name == "input":
-                self.translate([argument.value])
+            self.translate([argument.value])
         if argument.type == "var":
             self.operations.append(MemoryCell(Opcode.LD, self.variables[argument.value]))
         if argument.type == "val":
