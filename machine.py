@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import logging
 import sys
-from enum import Enum
 
 from io_helper import read_file
 from isa import Opcode, Operation, read_code
@@ -20,7 +19,7 @@ class Memory:
                 Memory.data.append(operation.arg)
             else:
                 Memory.data.append(operation)
-        Memory.data.extend([0]*(limit - len(code)))
+        Memory.data.extend([0] * (limit - len(code)))
 
 
 alu_op_2_operation = {
@@ -68,7 +67,9 @@ class DataPath:
 
         if sel_acc.code in alu_op_2_operation.keys():
             operation_result = alu_op_2_operation[sel_acc.code](self.acc, self.op_register)
-            assert -(2**32) <= operation_result <= (2**32 - 1), "operation result is out of bound: {}".format(operation_result)
+            assert -(2**32) <= operation_result <= (2**32 - 1), "operation result is out of bound: {}".format(
+                operation_result
+            )
             self.acc = operation_result
             return
 
@@ -329,7 +330,11 @@ class LogSettings:
 
 
 def simulate(
-    code: list[Operation], input_tokens: list[str], memory_size: int, instruction_limit: int, log_settings: LogSettings | None
+    code: list[Operation],
+    input_tokens: list[str],
+    memory_size: int,
+    instruction_limit: int,
+    log_settings: LogSettings | None,
 ) -> (str, int, int):
     Memory.init(code, memory_size)
     if len(Memory.data) > memory_size:
@@ -366,7 +371,9 @@ def simulate(
 def main(code_file: str, input_file: str, log_settings: LogSettings = None):
     code: list[Operation] = read_code(code_file)
     input_tokens = list(read_file(input_file))
-    output, instr_counter, tick_counter = simulate(code, input_tokens, memory_size=200, instruction_limit=100000, log_settings=log_settings)
+    output, instr_counter, tick_counter = simulate(
+        code, input_tokens, memory_size=200, instruction_limit=100000, log_settings=log_settings
+    )
 
     print(output)
 

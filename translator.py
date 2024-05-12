@@ -118,7 +118,7 @@ class Translator:
         mem_val = value
         if isinstance(value, str):
             pointer = self.dynamic_memory_pointer + (2**31)
-            value = value[1:len(value) - 1]
+            value = value[1 : len(value) - 1]
             value = value.replace("\\s", " ")
             value = value.replace("\\n", "\n")
             value_len = len(value)
@@ -234,7 +234,7 @@ class Translator:
                 self.code.append(Operation(Opcode.MEM, self.memory[i]))
             self.code.extend(self.operations)
             cur = self.memory_pointer
-            for operation in self.code[self.memory_pointer:]:
+            for operation in self.code[self.memory_pointer :]:
                 # Для всех команд с относительной адресацией рассчитываем абсолютные адреса
                 if operation.calc_flag is not None:
                     operation.arg = cur + (operation.arg * operation.calc_flag)
