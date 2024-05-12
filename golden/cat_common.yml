@@ -56,7 +56,7 @@ out_log: |
   DEBUG   machine:log           INSTR:  27 TICK:  45 PC:   6 ADDR:   1 MEM_OUT: 0 ACC: 0 OP_REG: 111 COMMAND: LD 1 @5
   DEBUG   machine:log           INSTR:  28 TICK:  48 PC:   7 ADDR:   2 MEM_OUT: 0 ACC: 0 OP_REG: 0 COMMAND: NEQ 2 @6
   DEBUG   machine:log           INSTR:  29 TICK:  49 PC:  13 ADDR:   2 MEM_OUT: 0 ACC: 0 OP_REG: 0 COMMAND: JPZ 13 @7
-  DEBUG   machine:simulate      Total instructions: 30
+  DEBUG   machine:simulate      Total instructions: 31
   DEBUG   machine:simulate      Total ticks: 49
   DEBUG   machine:simulate      Output buffer: foo
   DEBUG   machine:simulate      Execution stopped

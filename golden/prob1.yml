@@ -350,7 +350,7 @@ out_log: |
   DEBUG   machine:log           INSTR: 268 TICK: 587 PC:  52 ADDR:  12 MEM_OUT: 1 ACC: 9 OP_REG: 8 COMMAND: ADD 12 @51
   DEBUG   machine:log           INSTR: 269 TICK: 589 PC:  53 ADDR:   4 MEM_OUT: 9 ACC: 9 OP_REG: 8 COMMAND: ST 4 @52
   DEBUG   machine:log           VERBOSE LOGGING STOPPED...
-  DEBUG   machine:simulate      Total instructions: 29413
+  DEBUG   machine:simulate      Total instructions: 29414
   DEBUG   machine:simulate      Total ticks: 64291
   DEBUG   machine:simulate      Output buffer: 233168
   DEBUG   machine:simulate      Execution stopped

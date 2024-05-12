@@ -46,6 +46,7 @@ alu_op_2_operation = {
     Opcode.GR: lambda a, b: int(b > a),
     Opcode.LW: lambda a, b: int(b < a),
     Opcode.ADD: lambda a, b: int(a + b),
+    Opcode.SUB: lambda a, b: int(b - a),
     Opcode.DIV: lambda a, b: int(b / a),
     Opcode.MOD: lambda a, b: int(b % a),
     Opcode.MUL: lambda a, b: int(a * b),
@@ -100,13 +101,13 @@ class DataPath:
             return
 
         if isinstance(sel_acc, int):
-            assert -(2**32) <= sel_acc <= (2**32 - 1), "value is out of bound: {}".format(sel_acc)
+            assert -(2**31) <= sel_acc <= (2**31 - 1), "value is out of bound: {}".format(sel_acc)
             self.acc = sel_acc
             return
 
         if sel_acc.code in alu_op_2_operation.keys():
             operation_result = alu_op_2_operation[sel_acc.code](self.acc, self.op_register)
-            assert -(2**32) <= operation_result <= (2**32 - 1), "operation result is out of bound: {}".format(
+            assert -(2**31) <= operation_result <= (2**31 - 1), "operation result is out of bound: {}".format(
                 operation_result
             )
             self.acc = operation_result
@@ -118,7 +119,7 @@ class DataPath:
                 return
             symbol = self.ports[sel_acc.args[0]].pop(0)
             symbol_code = ord(symbol)
-            assert -(2**32) <= symbol_code <= (2**32 - 1), "input token is out of bound: {}".format(symbol_code)
+            assert -(2**31) <= symbol_code <= (2**31 - 1), "input token is out of bound: {}".format(symbol_code)
             self.acc = symbol_code
             return
 
@@ -487,6 +488,7 @@ def simulate(
         logging.critical("Memory corrupted")
         pass
     except StopMachineError:
+        control_unit.instr_counter += 1
         pass
     except EOFError:
         logging.warning("Input buffer is empty")

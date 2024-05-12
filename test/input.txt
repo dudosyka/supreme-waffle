@@ -1,0 +1,3 @@
+(print ">\sHello\swhat\sis\syour\sname\n")
+(input a)
+(print "<\s" a "\n>\sHi,\s" a)

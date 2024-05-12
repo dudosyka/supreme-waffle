@@ -181,7 +181,7 @@ out_log: |
   DEBUG   machine:log           INSTR:  87 TICK: 198 PC:  54 ADDR:  10 MEM_OUT: 0 ACC: 0 OP_REG: 4 COMMAND: LD 10 @53
   DEBUG   machine:log           INSTR:  88 TICK: 201 PC:  55 ADDR:  12 MEM_OUT: 0 ACC: 0 OP_REG: 0 COMMAND: OR 12 @54
   DEBUG   machine:log           INSTR:  89 TICK: 202 PC:  64 ADDR:  12 MEM_OUT: 0 ACC: 0 OP_REG: 0 COMMAND: JPZ 64 @55
-  DEBUG   machine:simulate      Total instructions: 90
+  DEBUG   machine:simulate      Total instructions: 91
   DEBUG   machine:simulate      Total ticks: 202
   DEBUG   machine:simulate      Output buffer: 1Td
   1

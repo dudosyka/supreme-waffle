@@ -28,7 +28,7 @@ out_log: |
   DEBUG   machine:log           INSTR:   0 TICK:   1 PC:   2 ADDR:   0 MEM_OUT: Opcode.JP ACC: 0 OP_REG: 0 COMMAND: JP 2 @0
   DEBUG   machine:log           INSTR:   1 TICK:   3 PC:   3 ADDR:   1 MEM_OUT: 2147483653 ACC: 2147483653 OP_REG: 0 COMMAND: LD 1 @2
   DEBUG   machine:log           INSTR:   2 TICK:  28 PC:   4 ADDR:  16 MEM_OUT: 100 ACC: 100 OP_REG: 0 COMMAND: OUT 0 @3
-  DEBUG   machine:simulate      Total instructions: 3
+  DEBUG   machine:simulate      Total instructions: 4
   DEBUG   machine:simulate      Total ticks: 28
   DEBUG   machine:simulate      Output buffer: Hello world
   DEBUG   machine:simulate      Execution stopped
