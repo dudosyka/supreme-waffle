@@ -75,7 +75,7 @@ out_code: |
   OUT_PURE
   HLT
 out_stdout: |
-  source LoC: 14 code instr: 44
+  source LoC: 15 code instr: 44
   ============================================================
   233168
 out_log: |

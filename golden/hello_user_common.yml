@@ -129,7 +129,7 @@ out_code: |
   MEM 44
   MEM 32
 out_stdout: |
-  source LoC: 6 code instr: 15
+  source LoC: 7 code instr: 15
   ============================================================
   >What is your name?
   <alex

@@ -1,5 +1,3 @@
-(set a (input))
-(loop (!= a 0)
-    (print a)
-    (set a (input))
-)
+(input a)
+(print a)
+(print "HELLO")

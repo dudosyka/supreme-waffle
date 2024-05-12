@@ -178,12 +178,12 @@ comment ::= <any symbols after: -->
 
 Интерфейс командной строки: `translator.py <input_file> <target_file>`
 
-Реализовано в модуле: [translator](./translator.py)
+Реализовано в модуле: [translator](translator.py)
 
 Этапы трансляции (функция `main`):
 
 1. Очистка комментариев и лишних пробелов
-2. Парсинг исходного кода (см. [parser](./parser.py)) и преобразование его в дерево объектов Instruction (см. [instruction](./instruction.py))
+2. Парсинг исходного кода (см. [parser](parser.py)) и преобразование его в дерево объектов Instruction (см. [instruction](instruction.py))
 3. Использование дерева для генерации машинного кода.
 
 Правила генерации машинного кода:
@@ -197,11 +197,11 @@ comment ::= <any symbols after: -->
 
 Интерфейс командной строки: `machine.py <machine_code_file> <input_file>`
 
-Реализовано в модуле: [machine](./machine.py).
+Реализовано в модуле: [machine](machine.py).
 
 ### DataPath
 
-<img src="ac_dp.png">
+<img src="report/ac_dp.png">
 
 Реализован в классе `DataPath`.
 
@@ -227,7 +227,7 @@ comment ::= <any symbols after: -->
 
 ### ControlUnit
 
-<img src="ac_cu.png">
+<img src="report/ac_cu.png">
 
 Реализован в классе `ControlUnit`.
 
@@ -260,7 +260,7 @@ comment ::= <any symbols after: -->
 
 Тестирование выполняется при помощи golden test-ов.
 
-Тесты реализованы в: [golden_bf_test.py](./golden_test.py). 
+Тесты реализованы в: [golden_bf_test.py](golden_test.py). 
 
 Конфигурации:
 - [golden/cat.yml](golden/cat_common.yml)

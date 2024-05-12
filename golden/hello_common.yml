@@ -21,7 +21,7 @@ out_code: |
   MEM 108
   MEM 100
 out_stdout: |
-  source LoC: 0 code instr: 4
+  source LoC: 1 code instr: 4
   ============================================================
   Hello world
 out_log: |

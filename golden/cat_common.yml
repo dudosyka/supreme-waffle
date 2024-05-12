@@ -22,7 +22,7 @@ out_code: |
   JP 5
   HLT
 out_stdout: |
-  source LoC: 4 code instr: 12
+  source LoC: 5 code instr: 12
   ============================================================
   foo
 out_log: |

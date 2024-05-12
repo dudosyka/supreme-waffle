@@ -5,8 +5,12 @@ from enum import Enum
 from io_helper import read_file, write_file
 
 
-# Enum всех доступных команд процессора
 class Opcode(str, Enum):
+    """
+        Перечисление всех доступных команд
+        Все опкоды кроме MEM являются инструкциями,
+        При инициализации памяти MEM парсится в числовую ячейку
+    """
     LD = "load"
     ST = "store"
     ADD = "add"
@@ -26,11 +30,13 @@ class Opcode(str, Enum):
     OUT = "output"
     OUT_PURE = "output pure"
     HLT = "halt"
-    MEM = "no operation"
+    MEM = "memory cell"
 
 
-# Класс описывающий объект операции на уровне системы команд
-class Operation:
+class MemoryCell:
+    """
+        Класс описывающий объект памяти
+    """
     def __init__(self, code: Opcode, arg: int | None = None, calc_flag: int | None = None, addr: int | None = None):
         self.code: Opcode = code
         self.arg: int | None = arg
@@ -71,7 +77,7 @@ str2opcode = {
 }
 
 
-def write_code(filename: str, operations: list[Operation]) -> None:
+def write_code(filename: str, operations: list[MemoryCell]) -> None:
     code = ""
     for j in range(len(operations)):
         code += f"{operations[j].to_string()}\n"
@@ -79,9 +85,9 @@ def write_code(filename: str, operations: list[Operation]) -> None:
     write_file(filename, code)
 
 
-def read_code(filename: str) -> list[Operation]:
+def read_code(filename: str) -> list[MemoryCell]:
     code = read_file(filename)
-    operations: list[Operation] = []
+    operations: list[MemoryCell] = []
     lines: list[str] = code.split("\n")
     for i in range(len(lines)):
         line = lines[i]
@@ -97,6 +103,6 @@ def read_code(filename: str) -> list[Operation]:
             arg = None
         else:
             continue
-        operations.append(Operation(str2opcode[opcode_str], arg, addr=i))
+        operations.append(MemoryCell(str2opcode[opcode_str], arg, addr=i))
 
     return operations
