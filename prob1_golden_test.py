@@ -9,7 +9,11 @@ import pytest
 import translator
 
 
-@pytest.mark.golden_test("golden/*_common.yml")
+def get_first_lines(n: int, output: str):
+    return "\n".join(output.split("\n")[0:n])
+
+
+@pytest.mark.golden_test("golden/prob1.yml")
 def test_translator_and_machine(golden, caplog):
     """Используется подход golden tests. У него не самая удачная реализация для
     python: https://pypi.org/project/pytest-golden/ , но знать об этом подходе
@@ -61,7 +65,10 @@ def test_translator_and_machine(golden, caplog):
         with contextlib.redirect_stdout(io.StringIO()) as stdout:
             translator.main(source, target)
             print("============================================================")
-            machine.main(target, input_stream)
+            # За 269 инструкций симуляция успеет посчитать первые 9 чисел.
+            # Так как основной поток вычислений идёт в цикле этого достаточно,
+            # для того, чтобы понять, что всё работает корректно
+            machine.main(target, input_stream, machine.LogSettings(verbose_instr=269))
 
         # Выходные данные также считываем в переменные.
         with open(target, encoding="utf-8") as file:

@@ -1,1 +1,5 @@
-(print "H" "e" "l" "l" "o" "\s" "w" "o" "r" "l" "d")
+(set a (input))
+(loop (!= a 0)
+    (print a)
+    (set a (input))
+)

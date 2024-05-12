@@ -1,0 +1,62 @@
+in_source: |-
+  (set a (input))
+  (loop (!= a 0)
+      (print a)
+      (set a (input))
+  )
+in_stdin: |-
+  foo
+out_code: |
+  JP 3
+  MEM 0
+  MEM 0
+  IN
+  ST 1
+  LD 1
+  NEQ 2
+  JPZ 13
+  LD 1
+  OUT
+  IN
+  ST 1
+  JP 5
+  HLT
+out_stdout: |
+  source LoC: 4 code instr: 12
+  ============================================================
+  foo
+out_log: |
+  DEBUG   machine:log           INSTR:   0 TICK:   1 PC:   3 ADDR:   0 MEM_OUT: Opcode.JP ACC: 0 OP_REG: 0 COMMAND: JP 3 @0
+  DEBUG   machine:log           INSTR:   1 TICK:   2 PC:   4 ADDR:   0 MEM_OUT: Opcode.JP ACC: 102 OP_REG: 0 COMMAND: IN @3
+  DEBUG   machine:log           INSTR:   2 TICK:   4 PC:   5 ADDR:   1 MEM_OUT: 102 ACC: 102 OP_REG: 0 COMMAND: ST 1 @4
+  DEBUG   machine:log           INSTR:   3 TICK:   6 PC:   6 ADDR:   1 MEM_OUT: 102 ACC: 102 OP_REG: 0 COMMAND: LD 1 @5
+  DEBUG   machine:log           INSTR:   4 TICK:   9 PC:   7 ADDR:   2 MEM_OUT: 0 ACC: 1 OP_REG: 102 COMMAND: NEQ 2 @6
+  DEBUG   machine:log           INSTR:   5 TICK:  10 PC:   8 ADDR:   2 MEM_OUT: 0 ACC: 1 OP_REG: 102 COMMAND: JPZ 13 @7
+  DEBUG   machine:log           INSTR:   6 TICK:  12 PC:   9 ADDR:   1 MEM_OUT: 102 ACC: 102 OP_REG: 102 COMMAND: LD 1 @8
+  DEBUG   machine:log           INSTR:   7 TICK:  13 PC:  10 ADDR:   1 MEM_OUT: 102 ACC: 102 OP_REG: 102 COMMAND: OUT @9
+  DEBUG   machine:log           INSTR:   8 TICK:  14 PC:  11 ADDR:   1 MEM_OUT: 102 ACC: 111 OP_REG: 102 COMMAND: IN @10
+  DEBUG   machine:log           INSTR:   9 TICK:  16 PC:  12 ADDR:   1 MEM_OUT: 111 ACC: 111 OP_REG: 102 COMMAND: ST 1 @11
+  DEBUG   machine:log           INSTR:  10 TICK:  17 PC:   5 ADDR:   1 MEM_OUT: 111 ACC: 111 OP_REG: 102 COMMAND: JP 5 @12
+  DEBUG   machine:log           INSTR:  11 TICK:  19 PC:   6 ADDR:   1 MEM_OUT: 111 ACC: 111 OP_REG: 102 COMMAND: LD 1 @5
+  DEBUG   machine:log           INSTR:  12 TICK:  22 PC:   7 ADDR:   2 MEM_OUT: 0 ACC: 1 OP_REG: 111 COMMAND: NEQ 2 @6
+  DEBUG   machine:log           INSTR:  13 TICK:  23 PC:   8 ADDR:   2 MEM_OUT: 0 ACC: 1 OP_REG: 111 COMMAND: JPZ 13 @7
+  DEBUG   machine:log           INSTR:  14 TICK:  25 PC:   9 ADDR:   1 MEM_OUT: 111 ACC: 111 OP_REG: 111 COMMAND: LD 1 @8
+  DEBUG   machine:log           INSTR:  15 TICK:  26 PC:  10 ADDR:   1 MEM_OUT: 111 ACC: 111 OP_REG: 111 COMMAND: OUT @9
+  DEBUG   machine:log           INSTR:  16 TICK:  27 PC:  11 ADDR:   1 MEM_OUT: 111 ACC: 111 OP_REG: 111 COMMAND: IN @10
+  DEBUG   machine:log           INSTR:  17 TICK:  29 PC:  12 ADDR:   1 MEM_OUT: 111 ACC: 111 OP_REG: 111 COMMAND: ST 1 @11
+  DEBUG   machine:log           INSTR:  18 TICK:  30 PC:   5 ADDR:   1 MEM_OUT: 111 ACC: 111 OP_REG: 111 COMMAND: JP 5 @12
+  DEBUG   machine:log           INSTR:  19 TICK:  32 PC:   6 ADDR:   1 MEM_OUT: 111 ACC: 111 OP_REG: 111 COMMAND: LD 1 @5
+  DEBUG   machine:log           INSTR:  20 TICK:  35 PC:   7 ADDR:   2 MEM_OUT: 0 ACC: 1 OP_REG: 111 COMMAND: NEQ 2 @6
+  DEBUG   machine:log           INSTR:  21 TICK:  36 PC:   8 ADDR:   2 MEM_OUT: 0 ACC: 1 OP_REG: 111 COMMAND: JPZ 13 @7
+  DEBUG   machine:log           INSTR:  22 TICK:  38 PC:   9 ADDR:   1 MEM_OUT: 111 ACC: 111 OP_REG: 111 COMMAND: LD 1 @8
+  DEBUG   machine:log           INSTR:  23 TICK:  39 PC:  10 ADDR:   1 MEM_OUT: 111 ACC: 111 OP_REG: 111 COMMAND: OUT @9
+  DEBUG   machine:log           INSTR:  24 TICK:  40 PC:  11 ADDR:   1 MEM_OUT: 111 ACC: 0 OP_REG: 111 COMMAND: IN @10
+  DEBUG   machine:log           INSTR:  25 TICK:  42 PC:  12 ADDR:   1 MEM_OUT: 0 ACC: 0 OP_REG: 111 COMMAND: ST 1 @11
+  DEBUG   machine:log           INSTR:  26 TICK:  43 PC:   5 ADDR:   1 MEM_OUT: 0 ACC: 0 OP_REG: 111 COMMAND: JP 5 @12
+  DEBUG   machine:log           INSTR:  27 TICK:  45 PC:   6 ADDR:   1 MEM_OUT: 0 ACC: 0 OP_REG: 111 COMMAND: LD 1 @5
+  DEBUG   machine:log           INSTR:  28 TICK:  48 PC:   7 ADDR:   2 MEM_OUT: 0 ACC: 0 OP_REG: 0 COMMAND: NEQ 2 @6
+  DEBUG   machine:log           INSTR:  29 TICK:  49 PC:  13 ADDR:   2 MEM_OUT: 0 ACC: 0 OP_REG: 0 COMMAND: JPZ 13 @7
+  DEBUG   machine:simulate      Total instructions: 30
+  DEBUG   machine:simulate      Total ticks: 49
+  DEBUG   machine:simulate      Output buffer: foo
+  DEBUG   machine:simulate      Execution stopped

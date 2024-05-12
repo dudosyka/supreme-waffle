@@ -35,12 +35,13 @@ class Procedure:
 
 class Translator:
     def __init__(self):
-        # Создано исключительно для более репрезентативных логов, непосредственно в трансляции не участвует
         self.memory: dict[int, any] = dict()
+        self.dynamic_memory: dict[int, int] = dict()
+        self.dynamic_memory_pointer: int = 0
 
         # Лист полученных инструкций языка верхнего уровня
         self.source: list[Instruction] = list()
-        # Указатель на текущую свободную ячейку для использования под переменные или литералы
+        # Указатель на текущую свободную ячейку для использования под числовые переменные или константы
         self.memory_pointer: int = 1
 
         # Хранит доступные пользователю процедуры для последующего инлайна в случае вызова
@@ -49,15 +50,17 @@ class Translator:
         # Маппинг переменных с адресами в памяти
         self.variables: dict[str, int] = dict()
 
-        # Маппинг литералов с адресами в памяти
-        self.literals: dict[int, int] = dict()
+        # Маппинг констант с адресами в памяти
+        self.consts: dict[any, int] = dict()
 
-        # Блок команд, который отвечает за подгрузку литералов по соответствующим адресам
-        self.initialize_block: list[Operation] = list()
         self.operations: list[Operation] = list()
-        self.program: list[Operation] = list()
+        self.code: list[Operation] = list()
 
     op_type = operator2opcode.keys()
+
+    def add_memory_cell(self, value: int = 0):
+        self.memory[self.memory_pointer] = value
+        self.memory_pointer += 1
 
     def translate_function(self, instruction: Instruction) -> str:
         func = Procedure()
@@ -65,7 +68,7 @@ class Translator:
         for var in instruction.arguments[1].value:
             func.args[var] = self.memory_pointer
             self.variables[var] = self.memory_pointer
-            self.memory_pointer += 1
+            self.add_memory_cell()
         self.translate(instruction.arguments[2].value)
         self.procedures[instruction.arguments[0].value] = func
 
@@ -81,9 +84,9 @@ class Translator:
                 operations.extend(self.translate_operator(argument.value))
                 operations.append(Operation(Opcode.ST, self.memory_pointer))
                 simplified_operands.append(self.memory_pointer)
-                self.memory_pointer += 1
+                self.add_memory_cell()
             if argument.type == "val":
-                literal_pointer = self.get_literal_pointer(argument.value)
+                literal_pointer = self.get_const_pointer(argument.value)
                 simplified_operands.append(literal_pointer)
             if argument.type == "var":
                 simplified_operands.append(self.variables[argument.value])
@@ -108,33 +111,42 @@ class Translator:
         # Подставляем относительный адрес
         self.operations[start_with].arg = body_end - start_with + ignore_next_jp
 
-    def get_literal_pointer(self, value: int) -> int:
-        if self.literals.__contains__(value):
-            return self.literals[value]
+    def get_const_pointer(self, value: any) -> int:
+        if self.consts.__contains__(value):
+            return self.consts[value]
 
+        mem_val = value
         if isinstance(value, str):
-            if value == '"\\s"':
-                value = "   "
-            symbol_code = ord(list(value)[1])
-            self.initialize_block.append(Operation(Opcode.LIT, symbol_code))
-        else:
-            self.initialize_block.append(Operation(Opcode.LIT, value))
-        self.initialize_block.append(Operation(Opcode.ST, self.memory_pointer))
+            pointer = self.dynamic_memory_pointer + (2**31)
+            value = value[1:len(value) - 1]
+            value = value.replace("\\s", " ")
+            value = value.replace("\\n", "\n")
+            value_len = len(value)
+            self.dynamic_memory[self.dynamic_memory_pointer] = value_len
+            for char in value:
+                self.dynamic_memory_pointer += 1
+                self.dynamic_memory[self.dynamic_memory_pointer] = ord(char)
 
-        self.literals[value] = self.memory_pointer
-        self.memory[self.memory_pointer] = value
-        self.memory_pointer += 1
+            self.dynamic_memory_pointer += 1
+            self.consts[value] = self.memory_pointer
+            self.add_memory_cell(pointer)
+            return self.get_const_pointer(value)
 
-        return self.get_literal_pointer(value)
+        self.consts[value] = self.memory_pointer
+        self.add_memory_cell(mem_val)
+
+        return self.get_const_pointer(value)
 
     def translate_arg(self, argument: Argument) -> None:
         if argument.type == "instr":
             if argument.value.name in self.op_type:
                 self.operations.extend(self.translate_operator(argument.value))
+            if argument.value.name == "input":
+                self.translate([argument.value])
         if argument.type == "var":
             self.operations.append(Operation(Opcode.LD, self.variables[argument.value]))
         if argument.type == "val":
-            literal_pointer = self.get_literal_pointer(argument.value)
+            literal_pointer = self.get_const_pointer(argument.value)
             self.operations.append(Operation(Opcode.LD, literal_pointer))
 
     def create_or_update_var(self, name: str, value: Argument) -> None:
@@ -145,15 +157,26 @@ class Translator:
         else:
             self.variables[name] = self.memory_pointer
             self.operations.append(Operation(Opcode.ST, self.memory_pointer))
-            self.memory_pointer += 1
+            self.add_memory_cell()
+
+    def create_str_var(self, name: str) -> int:
+        pointer = self.dynamic_memory_pointer + (2**31)
+        self.dynamic_memory[self.dynamic_memory_pointer] = 0
+        for i in range(64):
+            self.dynamic_memory_pointer += 1
+            self.dynamic_memory[self.dynamic_memory_pointer] = 0
+
+        self.dynamic_memory_pointer += 1
+        self.variables[name] = self.memory_pointer
+        self.add_memory_cell(pointer)
+
+        return self.variables[name]
 
     # Так как метод translate использует для трансляции инструкций на любом уровне
     # требуется флаг top_lvl который выставляется лишь в самом первом вызове
     # Только такие вызовы выполняю поиск инструкций для трансляции процедур и возвращают итоговый результат трансляции
     def translate(self, input_source: list[Instruction], top_lvl: bool = False) -> (int, list[Operation]):  # noqa: C901
         if top_lvl:
-            self.memory_pointer += 1
-
             # Firstly find all functions it can be only top-lvl instr
             for instr in input_source:
                 if instr.name == Term.DEPROC.value:
@@ -186,35 +209,44 @@ class Translator:
             if instr.name == "print":
                 for arg in instr.arguments:
                     self.translate_arg(arg)
-                    self.operations.append(Operation(Opcode.OUT, 0))
+                    self.operations.append(Operation(Opcode.OUT))
             if instr.name == "print_int":
                 for arg in instr.arguments:
                     self.translate_arg(arg)
-                    self.operations.append(Operation(Opcode.OUT_PURE, 0))
+                    self.operations.append(Operation(Opcode.OUT_PURE))
             if instr.name == "input":
-                arg = instr.arguments[0]
-                assert arg.type == "var", "input argument must be var"
-                self.create_or_update_var(arg.value, Argument("val", 0))
-                self.operations.append(Operation(Opcode.IN, 1))
-                self.operations.append(Operation(Opcode.ST, self.variables[arg.value]))
+                if len(instr.arguments) > 0:
+                    arg = instr.arguments[0]
+                    assert arg.type == "var", "input argument must be var"
+                    pointer = self.create_str_var(arg.value)
+                    self.operations.append(Operation(Opcode.IN, pointer))
+                else:
+                    self.operations.append(Operation(Opcode.IN))
 
         if top_lvl:
-            self.initialize_block.extend(self.operations)
-            self.program = [
+            self.code = [
                 Operation(Opcode.JP, self.memory_pointer),
             ]
-            self.program.extend([Operation(Opcode.NOP)] * (self.memory_pointer - 1))
-            self.program.extend(self.initialize_block)
+            diff = 1 + self.memory_pointer + len(self.operations)
+            for i in range(1, self.memory_pointer):
+                if self.memory[i] >= 2**31:
+                    self.memory[i] += diff
+                self.code.append(Operation(Opcode.MEM, self.memory[i]))
+            self.code.extend(self.operations)
             cur = self.memory_pointer
-            for operation in self.program[self.memory_pointer :]:
+            for operation in self.code[self.memory_pointer:]:
                 # Для всех команд с относительной адресацией рассчитываем абсолютные адреса
                 if operation.calc_flag is not None:
                     operation.arg = cur + (operation.arg * operation.calc_flag)
                 cur += 1
 
-            self.program.append(Operation(Opcode.HLT))
+            self.code.append(Operation(Opcode.HLT))
 
-            return len(self.program), self.program
+            for i in self.dynamic_memory:
+                cell = self.dynamic_memory[i]
+                self.code.append(Operation(Opcode.MEM, cell))
+
+            return len(self.operations) + 2, self.code
 
         return 0, ""
 

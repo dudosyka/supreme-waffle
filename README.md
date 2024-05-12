@@ -263,9 +263,9 @@ comment ::= <any symbols after: -->
 Тесты реализованы в: [golden_bf_test.py](./golden_test.py). 
 
 Конфигурации:
-- [golden/cat.yml](golden/cat.yml)
-- [golden/hello.yml](golden/hello.yml)
-- [golden/hello_user.yml](golden/hello_user.yml)
+- [golden/cat.yml](golden/cat_common.yml)
+- [golden/hello.yml](golden/hello_common.yml)
+- [golden/hello_user.yml](golden/hello_user_common.yml)
 - [golden/prob1.yml](golden/prob1.yml)
 
 Запустить тесты: `poetry run pytest . -v`
