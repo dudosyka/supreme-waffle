@@ -22,7 +22,7 @@ exp ::= (symbol)
       | (symbol const)
       | (symbol exp)
 
-symbol ::= set input print print_int deproc if loop + - / * % and or = != > <
+symbol ::= set input print print_int return deproc if loop + - / * % and or = != > <
 
 comment ::= <any symbols after: -->
 ```
@@ -35,6 +35,7 @@ comment ::= <any symbols after: -->
 - `(print <exp>)`                     -- напечатать значение являющееся результатам вычисления выражения (как строку)
 - `(print_int <exp>)`                 -- напечатать значение являющееся результатам вычисления выражения (как число)
 - `(deproc <name> <body-exp1..N>)`    -- объявить процедуру с именем \<name> и телом <body-exp1..N> 
+- `(return)`                          -- досрочно выйти из процедуры 
 - `(if <cond> <body-exp1..N>)`        -- условное выражение если \<cond> сделать <body-exp1..N> 
 - `(loop <end-cond> <body-exp1..N>)`  -- цикл с предусловием пока \<cond> выполнять <body-exp1..N>
 - `(+ <exp1> <exp2> ...)`             -- последовательное суммирование всех операндов
