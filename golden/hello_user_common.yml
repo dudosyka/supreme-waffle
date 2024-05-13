@@ -1,15 +1,16 @@
 in_source: |-
   (print ">\sHello\swhat\sis\syour\sname?\n")
   (input a)
-  (print "<\s" a "\n>\sHi,\s" a)
+  (print "<\s" a "\n>\sHi,\s" a "!")
 in_stdin: |-
   alex
 out_code: |
-  JP 5
-  MEM 2147483665
-  MEM 2147483693
-  MEM 2147483758
+  JP 6
+  MEM 2147483668
+  MEM 2147483696
   MEM 2147483761
+  MEM 2147483764
+  MEM 2147483772
   LD 1
   OUT 0
   IN 1 2
@@ -20,6 +21,8 @@ out_code: |
   LD 4
   OUT 0
   LD 2
+  OUT 0
+  LD 5
   OUT 0
   HLT
   MEM 27
@@ -126,28 +129,32 @@ out_code: |
   MEM 105
   MEM 44
   MEM 32
+  MEM 1
+  MEM 33
 out_stdout: |
-  source LoC: 3 code instr: 13
+  source LoC: 3 code instr: 15
   ============================================================
   > Hello what is your name?
   < alex
-  > Hi, alex
+  > Hi, alex!
 out_log: |
-  DEBUG   machine:log           INSTR:   0 TICK:   1 PC:   5 ADDR:   0 MEM_OUT: Opcode.JP ACC: 0 OP_REG: 0 COMMAND: JP 5 @0
-  DEBUG   machine:log           INSTR:   1 TICK:   3 PC:   6 ADDR:   1 MEM_OUT: 2147483665 ACC: 2147483665 OP_REG: 0 COMMAND: LD 1 @5
-  DEBUG   machine:log           INSTR:   2 TICK:  60 PC:   7 ADDR:  44 MEM_OUT: 10 ACC: 10 OP_REG: 0 COMMAND: OUT 0 @6
-  DEBUG   machine:log           INSTR:   3 TICK:  71 PC:   8 ADDR:  45 MEM_OUT: 4 ACC: 4 OP_REG: 0 COMMAND: IN 1 2 @7
-  DEBUG   machine:log           INSTR:   4 TICK:  73 PC:   9 ADDR:   3 MEM_OUT: 2147483758 ACC: 2147483758 OP_REG: 0 COMMAND: LD 3 @8
-  DEBUG   machine:log           INSTR:   5 TICK:  80 PC:  10 ADDR: 112 MEM_OUT: 32 ACC: 32 OP_REG: 0 COMMAND: OUT 0 @9
-  DEBUG   machine:log           INSTR:   6 TICK:  82 PC:  11 ADDR:   2 MEM_OUT: 2147483693 ACC: 2147483693 OP_REG: 0 COMMAND: LD 2 @10
-  DEBUG   machine:log           INSTR:   7 TICK:  93 PC:  12 ADDR:  49 MEM_OUT: 120 ACC: 120 OP_REG: 0 COMMAND: OUT 0 @11
-  DEBUG   machine:log           INSTR:   8 TICK:  95 PC:  13 ADDR:   4 MEM_OUT: 2147483761 ACC: 2147483761 OP_REG: 0 COMMAND: LD 4 @12
-  DEBUG   machine:log           INSTR:   9 TICK: 112 PC:  14 ADDR: 120 MEM_OUT: 32 ACC: 32 OP_REG: 0 COMMAND: OUT 0 @13
-  DEBUG   machine:log           INSTR:  10 TICK: 114 PC:  15 ADDR:   2 MEM_OUT: 2147483693 ACC: 2147483693 OP_REG: 0 COMMAND: LD 2 @14
-  DEBUG   machine:log           INSTR:  11 TICK: 125 PC:  16 ADDR:  49 MEM_OUT: 120 ACC: 120 OP_REG: 0 COMMAND: OUT 0 @15
-  DEBUG   machine:simulate      Total instructions: 13
-  DEBUG   machine:simulate      Total ticks: 125
+  DEBUG   machine:log           INSTR:   0 TICK:   1 PC:   6 ADDR:   0 MEM_OUT: Opcode.JP ACC: 0 OP_REG: 0 COMMAND: JP 6 @0
+  DEBUG   machine:log           INSTR:   1 TICK:   3 PC:   7 ADDR:   1 MEM_OUT: 2147483668 ACC: 2147483668 OP_REG: 0 COMMAND: LD 1 @6
+  DEBUG   machine:log           INSTR:   2 TICK:  60 PC:   8 ADDR:  47 MEM_OUT: 10 ACC: 10 OP_REG: 0 COMMAND: OUT 0 @7
+  DEBUG   machine:log           INSTR:   3 TICK:  71 PC:   9 ADDR:  48 MEM_OUT: 4 ACC: 4 OP_REG: 0 COMMAND: IN 1 2 @8
+  DEBUG   machine:log           INSTR:   4 TICK:  73 PC:  10 ADDR:   3 MEM_OUT: 2147483761 ACC: 2147483761 OP_REG: 0 COMMAND: LD 3 @9
+  DEBUG   machine:log           INSTR:   5 TICK:  80 PC:  11 ADDR: 115 MEM_OUT: 32 ACC: 32 OP_REG: 0 COMMAND: OUT 0 @10
+  DEBUG   machine:log           INSTR:   6 TICK:  82 PC:  12 ADDR:   2 MEM_OUT: 2147483696 ACC: 2147483696 OP_REG: 0 COMMAND: LD 2 @11
+  DEBUG   machine:log           INSTR:   7 TICK:  93 PC:  13 ADDR:  52 MEM_OUT: 120 ACC: 120 OP_REG: 0 COMMAND: OUT 0 @12
+  DEBUG   machine:log           INSTR:   8 TICK:  95 PC:  14 ADDR:   4 MEM_OUT: 2147483764 ACC: 2147483764 OP_REG: 0 COMMAND: LD 4 @13
+  DEBUG   machine:log           INSTR:   9 TICK: 112 PC:  15 ADDR: 123 MEM_OUT: 32 ACC: 32 OP_REG: 0 COMMAND: OUT 0 @14
+  DEBUG   machine:log           INSTR:  10 TICK: 114 PC:  16 ADDR:   2 MEM_OUT: 2147483696 ACC: 2147483696 OP_REG: 0 COMMAND: LD 2 @15
+  DEBUG   machine:log           INSTR:  11 TICK: 125 PC:  17 ADDR:  52 MEM_OUT: 120 ACC: 120 OP_REG: 0 COMMAND: OUT 0 @16
+  DEBUG   machine:log           INSTR:  12 TICK: 127 PC:  18 ADDR:   5 MEM_OUT: 2147483772 ACC: 2147483772 OP_REG: 0 COMMAND: LD 5 @17
+  DEBUG   machine:log           INSTR:  13 TICK: 132 PC:  19 ADDR: 125 MEM_OUT: 33 ACC: 33 OP_REG: 0 COMMAND: OUT 0 @18
+  DEBUG   machine:simulate      Total instructions: 15
+  DEBUG   machine:simulate      Total ticks: 132
   DEBUG   machine:simulate      Output buffer: > Hello what is your name?
   < alex
-  > Hi, alex
+  > Hi, alex!
   DEBUG   machine:simulate      Execution stopped

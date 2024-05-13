@@ -509,7 +509,7 @@ def main(code_file: str, input_file: str, log_settings: LogSettings = LogSetting
     code: list[MemoryCell] = read_code(code_file)
     input_tokens = list(read_file(input_file))
     output, instr_counter, tick_counter = simulate(
-        code, input_tokens, memory_size=200, instruction_limit=100000, log_settings=log_settings
+        code, input_tokens, memory_size=1000, instruction_limit=100000, log_settings=log_settings
     )
 
     print(output)

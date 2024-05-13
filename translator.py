@@ -30,6 +30,12 @@ class Procedure:
     def __init__(self):
         self.operations: list[MemoryCell] = list()
         self.args: dict[str, int] = dict()
+        self.vars_overwrite: dict[str, int] = dict()
+
+    def copy_operations(self):
+        return list(
+            map(lambda op: MemoryCell(op.code, list(map(int, op.args)), op.calc_flag, op.addr), self.operations)
+        )
 
 
 class Translator:
@@ -55,6 +61,18 @@ class Translator:
         self.operations: list[MemoryCell] = list()
         self.code: list[MemoryCell] = list()
 
+        self.handlers = {
+            Term.SET.value: self.create_or_update_var,
+            Term.IF.value: self.translate_conditional_instruction,
+            Term.LOOP.value: self.translate_loop,
+            Term.PRINT.value: self.translate_print,
+            Term.PRINT_INT.value: self.translate_print,
+            Term.INPUT.value: self.translate_input,
+            Term.RETURN.value: lambda instr: self.operations.append(
+                MemoryCell(Opcode.JP, [len(self.operations)], calc_flag=2)
+            ),
+        }
+
     op_type = operator2opcode.keys()
 
     def add_memory_cell(self, value: int = 0):
@@ -64,23 +82,48 @@ class Translator:
         self.memory[self.memory_pointer] = value
         self.memory_pointer += 1
 
-    def translate_procedure(self, instruction: Instruction) -> str:
+    def translate_procedure(self, instruction: Instruction):
         """
         Выполняет транслцию процедуры в набор инструкций, выделяет в памяти ячейки под аргументы
 
         Поддержка вызовов на уровне машинного кода отсутствует поэтому транслированное тело процедуры
         сохраняется и при нахождении инструкции вызова внутри исходного кода тело процедуры инлайниться
         """
-        func = Procedure()
+        proc = Procedure()
+        overwrite: dict[str, int] = {}
+        created: list[str] = []
         # Firstly map local variables if they exist to memory
         for var in instruction.arguments[1].value:
-            func.args[var] = self.memory_pointer
+            proc.args[var] = self.memory_pointer
+            if var in self.variables.keys():
+                overwrite[var] = self.variables[var]
+            else:
+                created.append(var)
             self.variables[var] = self.memory_pointer
             self.add_memory_cell()
-        self.translate(instruction.arguments[2].value)
-        self.procedures[instruction.arguments[0].value] = func
 
-        return instruction.arguments[0].value
+        self.translate(instruction.arguments[2].value)
+        self.procedures[instruction.arguments[0].value] = proc
+
+        for var in proc.vars_overwrite.keys():
+            self.variables[var] = proc.vars_overwrite[var]
+        for var in created:
+            self.variables.pop(var)
+
+        for operation in self.operations:
+            if operation.calc_flag is not None and operation.calc_flag > 1:
+                operation.args[0] = int(len(self.operations) - operation.args[0])
+                operation.calc_flag = 1
+
+            self.procedures[instruction.arguments[0].value].operations.append(operation)
+
+    def inline_procedure(self, call: Instruction):
+        proc = self.procedures[call.name]
+        for i in range(len(call.arguments)):
+            arg = call.arguments[i]
+            self.translate_arg(arg)
+            self.operations.append(MemoryCell(Opcode.ST, list(proc.args.values())[i]))
+        self.operations.extend(proc.copy_operations())
 
     def translate_operator(self, instruction: Instruction) -> list[MemoryCell]:
         """
@@ -115,15 +158,13 @@ class Translator:
 
     def translate_conditional_instruction(self, instruction: Instruction, ignore_next_jp: int = 0):
         """
-        Выполняет трансляцию управляющих инструкций, таких как циклы и условия
-        Сам вызывает метод трансляции условия перехода и вставляет необходимые джампы, кроме
-        джампа в начало для циклов
+        Выполняет трансляцию условий
+        Сам вызывает метод трансляции условия перехода и вставляет необходимые джампы.
+        Джампы помечаются через calc_flag - это означает что адреса в них относительные и они будут вычислены на финальном этапе
         """
         self.operations.extend(self.translate_operator(instruction.arguments[0].value))
         start_with = len(self.operations)
-        # После обработки условия вставляется джамп без адреса,
-        # относительный адрес будет установлен после обработки основного блока инструкций
-        # флаг calc_flag означает что абсолютный адрес будет вычислен на последнем этапе
+
         self.operations.append(MemoryCell(Opcode.JPZ, 0, 1))
         self.translate(instruction.arguments[1].value)
         if len(instruction.arguments) == 3:
@@ -177,13 +218,16 @@ class Translator:
             literal_pointer = self.get_const_pointer(argument.value)
             self.operations.append(MemoryCell(Opcode.LD, literal_pointer))
 
-    def create_or_update_var(self, name: str, value: Argument) -> None:
+    def create_or_update_var(self, instr: Instruction) -> None:
         """
         Выполняет транслцию инструкций управления переменными
         Если требуется создать переменную под нее выделяется память
         и прописывается инициализирующее значение если оно было задано
         Получение инициализационного значение происходит при помощи метода translate arg
         """
+        name: str = instr.arguments[0].value
+        value: Argument = instr.arguments[1]
+
         self.translate_arg(value)
 
         if self.variables.__contains__(name):
@@ -214,76 +258,74 @@ class Translator:
 
         return self.variables[name]
 
-    def translate(self, input_source: list[Instruction], top_lvl: bool = False) -> (int, list[MemoryCell]):  # noqa: C901
+    def translate_memory(self):
+        diff = 1 + self.memory_pointer + len(self.operations)
+        for i in range(1, self.memory_pointer):
+            if self.memory[i] >= 2**31:
+                self.memory[i] += diff
+            self.code.append(MemoryCell(Opcode.MEM, self.memory[i]))
+
+    def update_relative_jumps(self):
+        cur = self.memory_pointer
+        for operation in self.code[self.memory_pointer :]:
+            # Для всех команд с относительной адресацией рассчитываем абсолютные адреса
+            if operation.calc_flag is not None:
+                operation.args[0] = cur + (operation.args[0] * operation.calc_flag)
+            cur += 1
+
+    def translate_print(self, instr: Instruction):
+        for arg in instr.arguments:
+            self.translate_arg(arg)
+            if instr.name == "print":
+                self.operations.append(MemoryCell(Opcode.OUT, 0))
+            else:
+                self.operations.append(MemoryCell(Opcode.OUT_PURE, 0))
+
+    def translate_input(self, instr: Instruction):
+        if len(instr.arguments) > 0:
+            arg = instr.arguments[0]
+            assert arg.type == "var", "input argument must be var"
+            pointer = self.create_str_var(arg.value)
+            self.operations.append(MemoryCell(Opcode.IN, [1, pointer]))
+        else:
+            self.operations.append(MemoryCell(Opcode.IN, [1, None]))
+
+    def translate_loop(self, instr: Instruction):
+        start_with = len(self.operations)
+        self.translate_conditional_instruction(instr, ignore_next_jp=1)
+        self.operations.append(MemoryCell(Opcode.JP, len(self.operations) - start_with, -1))
+
+    def translate(  # noqa: C901
+        self, input_source: list[Instruction], proc_defs: list[Instruction] | None = None
+    ) -> (int, list[MemoryCell]):
         """
         Основной цикл трансляиии инструкций
-        Так как он используется всеми операциями, то для определения первичного вызова используется флаг top_lvl
-        В случае установки этого флага будет выполнен поиск и трансляция процедур и на выход метода будет подан массив
-        с ячейками памяти
         """
-        if top_lvl:
-            for instr in input_source:
-                if instr.name == Term.DEPROC.value:
-                    self.operations = []
-                    func_name = self.translate_procedure(instr)
-                    self.procedures[func_name].operations = self.operations
 
+        if proc_defs is not None:
+            for instr in proc_defs:
+                self.operations = []
+                self.translate_procedure(instr)
             self.operations = []
 
-        common = list(filter(lambda instr: instr.name != Term.DEPROC.value, input_source))
-
-        for instr in common:
-            if instr.name == "set":
-                self.create_or_update_var(instr.arguments[0].value, instr.arguments[1])
-            if instr.name in Translator.op_type:
+        for instr in input_source:
+            if instr.name in self.op_type:
                 self.operations.extend(self.translate_operator(instr))
-            if instr.name == "if":
-                self.translate_conditional_instruction(instr)
-            if instr.name == "loop":
-                start_with = len(self.operations)
-                self.translate_conditional_instruction(instr, ignore_next_jp=1)
-                self.operations.append(MemoryCell(Opcode.JP, len(self.operations) - start_with, -1))
-            if instr.name in self.procedures.keys():
-                func = self.procedures[instr.name]
-                for i in range(len(instr.arguments)):
-                    arg = instr.arguments[i]
-                    self.translate_arg(arg)
-                    self.operations.append(MemoryCell(Opcode.ST, list(func.args.values())[i]))
-                self.operations.extend(func.operations)
-            if instr.name == "print":
-                for arg in instr.arguments:
-                    self.translate_arg(arg)
-                    self.operations.append(MemoryCell(Opcode.OUT, 0))
-            if instr.name == "print_int":
-                for arg in instr.arguments:
-                    self.translate_arg(arg)
-                    self.operations.append(MemoryCell(Opcode.OUT_PURE, 0))
-            if instr.name == "input":
-                if len(instr.arguments) > 0:
-                    arg = instr.arguments[0]
-                    assert arg.type == "var", "input argument must be var"
-                    pointer = self.create_str_var(arg.value)
-                    self.operations.append(MemoryCell(Opcode.IN, [1, pointer]))
-                else:
-                    self.operations.append(MemoryCell(Opcode.IN, [1, None]))
 
-        if top_lvl:
+            if instr.name in self.procedures.keys():
+                self.inline_procedure(instr)
+
+            if instr.name in self.handlers.keys():
+                self.handlers[instr.name](instr)
+
+        if proc_defs is not None:
             self.code = [
                 MemoryCell(Opcode.JP, self.memory_pointer),
             ]
-            diff = 1 + self.memory_pointer + len(self.operations)
-            for i in range(1, self.memory_pointer):
-                if self.memory[i] >= 2**31:
-                    self.memory[i] += diff
-                self.code.append(MemoryCell(Opcode.MEM, self.memory[i]))
-            self.code.extend(self.operations)
-            cur = self.memory_pointer
-            for operation in self.code[self.memory_pointer :]:
-                # Для всех команд с относительной адресацией рассчитываем абсолютные адреса
-                if operation.calc_flag is not None:
-                    operation.args[0] = cur + (operation.args[0] * operation.calc_flag)
-                cur += 1
 
+            self.translate_memory()
+            self.code.extend(self.operations)
+            self.update_relative_jumps()
             self.code.append(MemoryCell(Opcode.HLT))
 
             for i in self.str_memory:
@@ -310,13 +352,17 @@ def main(source: str, output: str):
     expressions = program_to_expressions_list(input_code)
 
     parsed_instructions = list()
+    proc_definitions = list()
     for expression in expressions:
         instruction = parse_expression(input_code[expression.start_index + 1 : expression.end_index])
+        if instruction.name == "deproc":
+            proc_definitions.append(instruction)
+            continue
         parsed_instructions.append(instruction)
 
     translator = Translator()
 
-    amount, operations = translator.translate(parsed_instructions, True)
+    amount, operations = translator.translate(parsed_instructions, proc_definitions)
     print("source LoC:", lines + 1, "code instr:", amount)
 
     write_code(output, operations)

@@ -63,7 +63,7 @@ class Parser:
 
         return "val", int(term), diff
 
-    def unified_parse_loop(self):  # noqa: C901
+    def unified_parse_loop(self):
         i = 0
         while i < len(self.code):
             cut = self.code[i : len(self.code)]
@@ -71,30 +71,23 @@ class Parser:
             term = terms[0]
             is_opener, operand = self.is_opener(term)
             if is_opener:
-                if self.name == "deproc" and len(self.instr.arguments) == 1:
-                    args = self.code[i : len(self.code)].split(") (")[0][1:]
-                    operand = Argument("var", args.split())
-                    i += len(self.code[i : len(self.code)].split(") (")[0]) + 2
-                    Parser.available_functions.append(self.instr.arguments[0].value)
-                else:
-                    instr_list = []
-                    for parsed in program_to_expressions_list(self.code[i : len(self.code)]):
-                        items = cut[parsed.start_index : parsed.end_index].split()
-                        instruction_name = "".join(list(items[0])[1:])
-                        parser = Parser(instruction_name, " ".join(items[1:]))
-                        instr_list.append(parser.parse())
-                        i += parsed.end_index + 1
+                instr_list = []
+                for parsed in program_to_expressions_list(self.code[i : len(self.code)]):
+                    expression = cut[parsed.start_index + 1 : parsed.end_index]
+                    instruction = parse_expression(expression)
+                    instr_list.append(instruction)
+                    i += parsed.end_index + 1
 
-                    if self.name == "deproc":
-                        operand = Argument("instr_list", instr_list)
-                    elif (self.name == "if" or self.name == "loop") and len(self.instr.arguments) == 0:
-                        self.instr.arguments.append(Argument("instr", instr_list[0]))
-                        operand = Argument("instr_list", instr_list[1:])
-                    else:
-                        for arg in instr_list[0 : len(instr_list) - 1]:
-                            operand = Argument("instr", arg)
-                            self.instr.arguments.append(operand)
-                        operand = Argument("instr", instr_list[len(instr_list) - 1])
+                if self.name == "deproc":
+                    operand = Argument("instr_list", instr_list)
+                elif (self.name == "if" or self.name == "loop") and len(self.instr.arguments) == 0:
+                    self.instr.arguments.append(Argument("instr", instr_list[0]))
+                    operand = Argument("instr_list", instr_list[1:])
+                else:
+                    for arg in instr_list[0 : len(instr_list) - 1]:
+                        operand = Argument("instr", arg)
+                        self.instr.arguments.append(operand)
+                    operand = Argument("instr", instr_list[-1])
             else:
                 optype, value, diff = self.get_simple_operand_type(term)
                 operand = Argument(optype, value)
@@ -120,6 +113,18 @@ class Parser:
 def parse_expression(instruction: str) -> Instruction:
     terms = instruction.split()
     instruction_name = terms[0]
+
+    if instruction_name == "deproc":
+        proc_name = Argument("var", terms[1])
+        args = Argument("var", " ".join(terms[2:]).split(") (")[0][1:].split())
+        parser = Parser("deproc", " ".join(terms[(2 + len(args.value)) :]))
+        proc = parser.parse()
+        Parser.available_functions.append(proc_name.value)
+        proc.arguments.append(args)
+        proc.arguments.append(proc_name)
+        proc.arguments.reverse()
+        return proc
+
     parser = Parser(instruction_name, " ".join(terms[1:]))
     return parser.parse()
 

@@ -8,6 +8,7 @@ available_instructions = [
     "print",
     "print_int",
     "deproc",
+    "return",
     "if",
     "loop",
     "+",
@@ -29,9 +30,10 @@ class Term(str, Enum):
     LOOP = "loop"
     IF = "if"
     DEPROC = "deproc"
+    RETURN = "return"
     INPUT = "input"
     PRINT = "print"
-    PRINT_INT = "print integer"
+    PRINT_INT = "print_int"
     AND = "and"
     OR = "or"
     EQ = "="
