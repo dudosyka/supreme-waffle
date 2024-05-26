@@ -314,6 +314,8 @@ class ControlUnit:
                 raise MemoryCorruptedError()
 
             self.data_path.latch_acc()
+            self.tick()
+
             self.data_path.latch_br()
             self.tick()
 
