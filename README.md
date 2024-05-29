@@ -13,16 +13,18 @@ program ::= exp
 
 space ::= \s
 line-break :== \n
-str ::= "<any chars except spaces and line-breaks"
+str ::= "any chars except spaces and line-breaks"
+      | str space str
+      | str line-break str
 
 const ::= str
         | <any digits>
 
+symbol ::= set input print print_int deproc if loop + - / * % and or = != > <
+
 exp ::= (symbol)
       | (symbol const)
       | (symbol exp)
-
-symbol ::= set input print print_int deproc if loop + - / * % and or = != > <
 
 comment ::= <any symbols after: -->
 ```
