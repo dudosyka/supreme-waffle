@@ -381,7 +381,7 @@ Options:
 
 ### DataPath
 
-<img src="https://github.com/dudosyka/supreme-waffle/blob/master/report/ac_dp.png?raw=true">
+<img src="https://raw.githubusercontent.com/dudosyka/supreme-waffle/master/report/ac_dp.png">
 
 Реализован в классе `DataPath`.
 
@@ -417,7 +417,7 @@ Options:
 
 ### ControlUnit
 
-<img src="https://github.com/dudosyka/supreme-waffle/blob/master/report/ac_cu.png?raw=true">
+<img src="https://raw.githubusercontent.com/dudosyka/supreme-waffle/master/report/ac_cu.png">
 
 Реализован в классе `ControlUnit`.
 

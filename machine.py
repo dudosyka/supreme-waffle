@@ -112,9 +112,7 @@ class DataPath:
 
     @staticmethod
     def check_value_valid(value):
-        assert -(2**31) <= value <= (2**31 - 1), "value is out of bound: {}".format(
-            value
-        )
+        assert -(2**31) <= value <= (2**31 - 1), "value is out of bound: {}".format(value)
 
     def run_alu(self, sig_op: Opcode, sel_op: int = 1, literal: int = 0) -> int:
         if sel_op == 1:
@@ -334,7 +332,7 @@ class ControlUnit:
         self.data_path.latch_acc()
         self.tick()
 
-        self.data_path.latch_br(sel_br=3, sig_op=Opcode.SUB, sel_op=2 ** 31)
+        self.data_path.latch_br(sel_br=3, sig_op=Opcode.SUB, sel_op=2**31)
         self.tick()
 
         if self.data_path.br_negative():
