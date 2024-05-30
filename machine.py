@@ -7,7 +7,7 @@ from io_helper import read_file
 from isa import MemoryCell, Opcode, read_code
 
 
-class Memory:
+class MemoryUnit:
     """
     Объект памяти в котором хранятся ячейки с инструкциями и данными
     Инициализируется единожды при старте процессора
@@ -18,16 +18,16 @@ class Memory:
 
     @staticmethod
     def init(code: list[MemoryCell], limit: int):
-        Memory.data = []
+        MemoryUnit.data = []
         for operation in code:
             if operation.code is Opcode.MEM:
                 assert -(2**32) <= operation.args[0] <= (2**32 - 1), "memory cell is out of bound: {}".format(
                     operation.args[0]
                 )
-                Memory.data.append(operation.args[0])
+                MemoryUnit.data.append(operation.args[0])
             else:
-                Memory.data.append(operation)
-        Memory.data.extend([0] * (limit - len(code)))
+                MemoryUnit.data.append(operation)
+        MemoryUnit.data.extend([0] * (limit - len(code)))
 
 
 class MemoryCorruptedError(Exception):
@@ -43,14 +43,51 @@ alu_op_2_operation = {
     Opcode.OR: lambda a, b: int(a or b),
     Opcode.EQ: lambda a, b: int(a == b),
     Opcode.NEQ: lambda a, b: int(a != b),
-    Opcode.GR: lambda a, b: int(b > a),
-    Opcode.LW: lambda a, b: int(b < a),
+    Opcode.GR: lambda a, b: int(a > b),
+    Opcode.LW: lambda a, b: int(a < b),
     Opcode.ADD: lambda a, b: int(a + b),
-    Opcode.SUB: lambda a, b: int(b - a),
-    Opcode.DIV: lambda a, b: int(b / a),
-    Opcode.MOD: lambda a, b: int(b % a),
+    Opcode.SUB: lambda a, b: int(a - b),
+    Opcode.DIV: lambda a, b: int(a / b),
+    Opcode.MOD: lambda a, b: int(a % b),
     Opcode.MUL: lambda a, b: int(a * b),
 }
+
+
+class IOUnit:
+    def __init__(self):
+        self.devices = {}
+
+    def register_port(self, port_index: int, value: str | None = None) -> bool:
+        if port_index in self.devices:
+            return False
+
+        self.devices[port_index] = list(value)
+        return True
+
+    def get_value(self, port_index: int) -> int | None:
+        if port_index in self.devices and len(self.devices[port_index]) > 0:
+            return ord(self.devices[port_index].pop(0))
+
+        return None
+
+    def put_int(self, port_index: int, value: int) -> bool:
+        if port_index in self.devices:
+            self.devices[port_index].append(str(value))
+            return True
+
+        return False
+
+    def put_char(self, port_index: int, value: int) -> bool:
+        if port_index in self.devices:
+            self.devices[port_index].append(chr(value))
+            return True
+
+        return False
+
+    def read_all_from_port(self, port_index: int) -> str:
+        if port_index not in self.devices:
+            return ""
+        return "".join(self.devices[port_index])
 
 
 class DataPath:
@@ -65,32 +102,48 @@ class DataPath:
     buffer_register - буфферный регистр используется при работе со строками
     """
 
-    def __init__(self, input_buffer: list):
-        self.memory = Memory
+    def __init__(self, io_unit: IOUnit):
+        self.memory = MemoryUnit
+        self.io_unit = io_unit
         self.addr_register = 0
         self.acc = 0
         self.op_register = 0
-        self.ports: dict[int, list[str]] = dict()
-        self.ports[1] = input_buffer  # Input buffer
-        self.ports[0] = []  # Output buffer
         self.buffer_register = 0
 
-    def latch_addr(self, sel_addr: int | None = None):
-        """+<----------+
-                        |           |
-                    +-----+     +------+
-        sel_addr -->| MUX | --> | addr |
-                    +-----+     +------+
-                    Сигнал защёлкивания регистра адреса, может защёлкнуть либо
-                    * Новый адрес из сигнала sel_addr
-                    * Свое старое значение (без изменений)
+    @staticmethod
+    def check_value_valid(value):
+        assert -(2**31) <= value <= (2**31 - 1), "value is out of bound: {}".format(
+            value
+        )
+
+    def run_alu(self, sig_op: Opcode, sel_op: int = 1, literal: int = 0) -> int:
+        if sel_op == 1:
+            operation_result = alu_op_2_operation[sig_op](self.op_register, self.acc)
+        elif sel_op == 2:
+            operation_result = alu_op_2_operation[sig_op](self.acc, self.buffer_register)
+        else:
+            operation_result = alu_op_2_operation[sig_op](self.acc, literal)
+
+        self.check_value_valid(operation_result)
+        return operation_result
+
+    def latch_addr(self, sel_addr: int):
         """
-        if sel_addr is not None:
+        Защёлка адресного регистра, может защёлкнуть либо
+        * Старое значение +1 (sel_addr = -2)
+        * Значение из буферного регистра (sel_addr = -1)
+        * Константу (sel_addr >= 0)
+        """
+        if sel_addr == -2:
+            self.addr_register = self.addr_register + 1
+        if sel_addr == -1:
+            self.addr_register = self.buffer_register
+        if sel_addr >= 0:
             self.addr_register = sel_addr
 
-    def latch_acc(self, sel_acc: MemoryCell | int = None):
+    def latch_acc(self, sel_acc: MemoryCell | int = None, sel_op: int = 1):
         """
-        Защёлка аккумулятора работает, может защёлкнуть либо
+        Защёлка аккумулятора, может защёлкнуть либо
         * Значение текущей ячейки памяти
         * Константу
         * Результат операции
@@ -101,26 +154,24 @@ class DataPath:
             return
 
         if isinstance(sel_acc, int):
-            assert -(2**31) <= sel_acc <= (2**31 - 1), "value is out of bound: {}".format(sel_acc)
+            self.check_value_valid(sel_acc)
             self.acc = sel_acc
             return
 
         if sel_acc.code in alu_op_2_operation.keys():
-            operation_result = alu_op_2_operation[sel_acc.code](self.acc, self.op_register)
-            assert -(2**31) <= operation_result <= (2**31 - 1), "operation result is out of bound: {}".format(
-                operation_result
-            )
-            self.acc = operation_result
+            if sel_op == 1:
+                self.acc = self.run_alu(sel_acc.code, sel_op=sel_op)
+            else:
+                self.acc = self.run_alu(sel_acc.code, sel_op=sel_op, literal=sel_op)
             return
 
         if sel_acc.code == Opcode.IN:
-            if len(self.ports[sel_acc.args[0]]) == 0:
+            symbol = self.io_unit.get_value(sel_acc.args[0])
+            if symbol is None:
                 self.acc = 0
                 return
-            symbol = self.ports[sel_acc.args[0]].pop(0)
-            symbol_code = ord(symbol)
-            assert -(2**31) <= symbol_code <= (2**31 - 1), "input token is out of bound: {}".format(symbol_code)
-            self.acc = symbol_code
+            self.check_value_valid(symbol)
+            self.acc = symbol
             return
 
     def latch_op(self):
@@ -129,56 +180,62 @@ class DataPath:
         """
         self.op_register = self.acc
 
-    def latch_br(self):
+    def latch_br(self, sel_br: int | Opcode, sig_op: Opcode | None = None, sel_op: int = 1):
         """
-        Защёлка буферного регистра
+        Защёлка буферного регистра, может защёлкнуть либо
+        * Свое значение -1
+        * Значение из аккумулятора
+        * Результат операции
         """
-        self.buffer_register = self.acc
+        if sel_br == 1:
+            self.buffer_register = self.buffer_register - 1
+        if sel_br == 2:
+            self.buffer_register = self.acc
+        if sel_br == 3:
+            self.buffer_register = self.run_alu(sig_op, sel_op=sel_op, literal=sel_op)
 
-    def signal_wr(self):
+    def sig_wr(self):
         """
         Сигнал записи в память значения из аккумулятора по текущему адресу
         """
         self.memory.data[self.addr_register] = self.acc
 
-    def signal_output(self, port: int, pure: bool = False):
+    def sig_out(self, port: int, pure: bool = False):
         """
         Сигнал записи в устройство вывода значения из аккумулятора
         """
         if pure:
-            self.ports[port].append(str(self.acc))
-            return
-        symbol = chr(self.acc)
-        self.ports[port].append(symbol)
+            self.io_unit.put_int(port, self.acc)
+        else:
+            self.io_unit.put_char(port, self.acc)
 
-    def zero(self):
+    def acc_zero(self):
         """
         Сигнал означающий что в аккумуляторе 0
         """
         return self.acc == 0
 
-    def br(self):
+    def br_zero(self):
         """
-        Сигнал с текущим значением буферного регистра
+        Сигнал означающий что в буфферном регистре 0
         """
-        return self.buffer_register
+        return self.buffer_register == 0
 
-    def acc_val(self):
+    def br_negative(self):
         """
-        Сигнал с текущим значением аккумулятора регистра
+        Сигнал означающий что в буфферном регистре число < 0
         """
-        return self.acc
+        return self.buffer_register < 0
 
 
 class ControlUnit:
     def __init__(self, data_path: DataPath):
-        self.program_address: int = 0
-        self.memory = Memory
+        self.memory = MemoryUnit
         self.data_path: DataPath = data_path
+        self.program_address: int = 0
         self.tick_counter: int = 0
-        self.counter = 0
-        self.instr_counter = 0
-        self.buffer_register: int = 0
+        self.counter: int = 0
+        self.instr_counter: int = 0
 
     def tick(self):
         self.tick_counter += 1
@@ -194,12 +251,6 @@ class ControlUnit:
         else:
             self.program_address += 1
 
-    def signal_latch_buffer_register(self, val: int):
-        """
-        Защёлка буфферного регистра
-        """
-        self.buffer_register = val
-
     def decode_and_execute_control_flow_instruction(self, operation: MemoryCell):
         """
         Декодирование и исполнение инструкций управления
@@ -209,78 +260,57 @@ class ControlUnit:
         if operation.code == Opcode.HLT:
             raise StopMachineError()
 
-        if operation.code == Opcode.JP or (operation.code == Opcode.JPZ and self.data_path.zero()):
+        if operation.code == Opcode.JP or (operation.code == Opcode.JPZ and self.data_path.acc_zero()):
             self.signal_latch_program_address(operation)
             return
 
         self.signal_latch_program_address()
-
-    @staticmethod
-    def translate_pointer(operation: int) -> int | None:
-        """
-        Выполняет вычисление указателя
-        Указатели можно отличить от остальных ячеек в памяти по старшему биту, так как ячейки 32 битные
-        То в случае если старший 32 бит = 1, то это указатель и указывает он на ячейку по адресу который
-        сохранен в оставшихся 31 битах
-        """
-        pointer = operation - (2**31)
-        if pointer < 0:
-            return None
-
-        return pointer
 
     def execute_out_instruction(self, operation: MemoryCell):
         """
         Выполняет инструкции для работы с устройством вывода
         OUT_PURE команда отправляет текущее значение аккумулятора в устройство вывода без конвертации в ASCII символ
         OUT команда
-         * если текущее значение аккумулятора - указатель, декодирует его и запускает цикл на основе counter для
-         печати всей строки посимвольно в поток вывода
+         * если текущее значение аккумулятора - указатель, декодирует его и запускает цикл на основе длины строки для
+         печати её посимвольно в поток вывода
          * если значение аккумулятора - не указатель, выполняется его отправка в поток вывода с предварительной
          конвертацией в символ ASCII
         """
         if operation.code == Opcode.OUT_PURE:
-            self.data_path.signal_output(pure=True, port=operation.args[0])
+            self.data_path.sig_out(pure=True, port=operation.args[0])
             self.signal_latch_program_address(operation)
             self.tick()
             return
 
-        is_pointer = self.translate_pointer(self.data_path.acc_val())
-        if self.counter == 0:
-            if is_pointer is None:
-                self.data_path.signal_output(operation.args[0])
-                self.signal_latch_program_address(operation)
-                self.tick()
-                return
+        self.data_path.latch_br(sel_br=3, sig_op=Opcode.SUB, sel_op=2**31)
+        self.tick()
 
-            self.signal_latch_buffer_register(is_pointer)
-            self.data_path.latch_addr(sel_addr=is_pointer)
-            self.tick()
-
-            self.data_path.latch_acc()
-            self.tick()
-
-            self.data_path.latch_br()
-            self.counter += 1
-            self.execute_out_instruction(operation)
-
-        if 0 < self.counter <= self.data_path.br():
-            self.data_path.latch_addr(sel_addr=(self.buffer_register + self.counter))
-            self.tick()
-
-            self.data_path.latch_acc()
-            self.tick()
-
-            self.data_path.signal_output(operation.args[0])
-            self.counter += 1
-            self.execute_out_instruction(operation)
-
-        if self.counter != 0:
+        if self.data_path.br_negative():
+            self.data_path.sig_out(port=operation.args[0])
             self.signal_latch_program_address(operation)
-            self.counter = 0
+            self.tick()
+            return
+
+        self.data_path.latch_addr(sel_addr=-1)
+        self.tick()
+
+        self.data_path.latch_acc()
+        self.tick()
+
+        self.data_path.latch_br(sel_br=2)
+        self.data_path.latch_addr(sel_addr=-2)
+        self.tick()
+
+        while not self.data_path.br_zero():
+            self.data_path.latch_acc()
+            self.tick()
+            self.data_path.sig_out(operation.args[0])
+            self.data_path.latch_addr(sel_addr=-2)
+            self.data_path.latch_br(sel_br=1)
             self.tick()
 
-        return
+        self.signal_latch_program_address(operation)
+        self.tick()
 
     def execute_in_instruction(self, operation: MemoryCell):
         """
@@ -298,52 +328,50 @@ class ControlUnit:
 
         pointer_addr = operation.args[1]
 
-        if self.counter == 0:
-            self.data_path.latch_addr(sel_addr=pointer_addr)
+        self.data_path.latch_addr(sel_addr=pointer_addr)
+        self.tick()
+
+        self.data_path.latch_acc()
+        self.tick()
+
+        self.data_path.latch_br(sel_br=3, sig_op=Opcode.SUB, sel_op=2 ** 31)
+        self.tick()
+
+        if self.data_path.br_negative():
+            raise MemoryCorruptedError()
+
+        self.data_path.latch_addr(sel_addr=-1)
+
+        self.data_path.latch_acc()
+        self.tick()
+
+        self.data_path.latch_br(sel_br=3, sig_op=Opcode.ADD, sel_op=2)
+        self.tick()
+
+        self.data_path.latch_addr(sel_addr=-1)
+        self.tick()
+        self.data_path.latch_acc(sel_acc=operation)
+        self.counter = 0
+
+        while not self.data_path.acc_zero():
+            self.data_path.latch_addr(sel_addr=-2)
             self.tick()
-
-            self.data_path.latch_acc()
-            self.tick()
-
-            is_pointer = self.translate_pointer(self.data_path.acc_val())
-            if is_pointer is not None:
-                self.signal_latch_buffer_register(is_pointer)
-                self.data_path.latch_addr(sel_addr=is_pointer)
-                self.tick()
-            else:
-                raise MemoryCorruptedError()
-
-            self.data_path.latch_acc()
-            self.tick()
-
-            self.data_path.latch_br()
-            self.tick()
-
+            self.data_path.sig_wr()
             self.data_path.latch_acc(sel_acc=operation)
+            self.tick()
             self.counter += 1
-            self.execute_in_instruction(operation)
-            self.tick()
+            assert self.counter <= 64, "Buffer overflow error"
 
-        if self.counter >= 1:
-            addr = self.buffer_register + self.data_path.br() + self.counter
-            if self.data_path.acc_val() != 0:
-                assert addr - self.buffer_register <= 64, "Buffer overflow error"
-                self.data_path.latch_addr(sel_addr=addr)
-                self.tick()
-                self.data_path.signal_wr()
-                self.data_path.latch_acc(sel_acc=operation)
-                self.counter += 1
-                self.execute_in_instruction(operation)
-            else:
-                self.data_path.latch_acc(sel_acc=addr - self.buffer_register - 1)
-                self.data_path.latch_addr(sel_addr=self.buffer_register)
-                self.tick()
-                self.data_path.signal_wr()
+        self.data_path.latch_addr(sel_addr=-1)
+        self.tick()
 
-        if self.counter != 0:
-            self.signal_latch_program_address(operation)
-            self.counter = 0
-            self.tick()
+        self.data_path.latch_acc(sel_acc=self.counter)
+        self.tick()
+
+        self.data_path.sig_wr()
+
+        self.signal_latch_program_address(operation)
+        self.tick()
 
     def decode_and_execute_io_instruction(self, operation: MemoryCell):
         if operation.code in [Opcode.OUT, Opcode.OUT_PURE]:
@@ -395,7 +423,7 @@ class ControlUnit:
             self.data_path.latch_addr(sel_addr=operation.args[0])
             self.tick()
 
-            self.data_path.signal_wr()
+            self.data_path.sig_wr()
             self.signal_latch_program_address(operation)
             self.tick()
             return
@@ -458,7 +486,7 @@ class LogSettings:
 
 def simulate(
     code: list[MemoryCell],
-    input_tokens: list[str],
+    input_buffer: str,
     memory_size: int,
     instruction_limit: int,
     log_settings: LogSettings,
@@ -472,11 +500,15 @@ def simulate(
 
     Инициализирует Memory, ControlUnit, DataPath и выполняет последовательное исполнение инструкций
     """
-    Memory.init(code, memory_size)
-    if len(Memory.data) > memory_size:
+    MemoryUnit.init(code, memory_size)
+    if len(MemoryUnit.data) > memory_size:
         logging.critical("Memory limit exceeded")
         return "", 0, 0
-    data_path = DataPath(input_tokens)
+
+    io_unit = IOUnit()
+    io_unit.register_port(0, "")
+    io_unit.register_port(1, input_buffer)
+    data_path = DataPath(io_unit)
     control_unit = ControlUnit(data_path)
     try:
         while control_unit.instr_counter < instruction_limit:
@@ -499,17 +531,19 @@ def simulate(
     if control_unit.instr_counter >= instruction_limit:
         logging.warning("Limit exceeded!")
 
+    output_buffer = control_unit.data_path.io_unit.read_all_from_port(0)
+
     logging.debug(f"Total instructions: {control_unit.instr_counter}")
     logging.debug(f"Total ticks: {control_unit.tick_counter}")
-    logging.debug(f"Output buffer: {''.join(control_unit.data_path.ports[0])}")
+    logging.debug(f"Output buffer: {output_buffer}")
     logging.debug("Execution stopped")
 
-    return "".join(control_unit.data_path.ports[0]), control_unit.instr_counter, control_unit.tick_counter
+    return output_buffer, control_unit.instr_counter, control_unit.tick_counter
 
 
 def main(code_file: str, input_file: str, log_settings: LogSettings = LogSettings()):
     code: list[MemoryCell] = read_code(code_file)
-    input_tokens = list(read_file(input_file))
+    input_tokens = read_file(input_file)
     output, instr_counter, tick_counter = simulate(
         code, input_tokens, memory_size=1000, instruction_limit=100000, log_settings=log_settings
     )
