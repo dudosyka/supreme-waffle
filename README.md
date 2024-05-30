@@ -13,16 +13,18 @@ program ::= exp
 
 space ::= \s
 line-break :== \n
-str ::= "<any chars except spaces and line-breaks"
+str ::= "any chars except spaces and line-breaks"
+      | str space str
+      | str line-break str
 
 const ::= str
         | <any digits>
 
+symbol ::= set input print print_int deproc return if loop + - / * % and or = != > <
+
 exp ::= (symbol)
       | (symbol const)
       | (symbol exp)
-
-symbol ::= set input print print_int deproc if loop + - / * % and or = != > <
 
 comment ::= <any symbols after: -->
 ```
@@ -34,7 +36,8 @@ comment ::= <any symbols after: -->
 - `(input)`                           -- ввести значение (один символ)
 - `(print <exp>)`                     -- напечатать значение являющееся результатам вычисления выражения (как строку)
 - `(print_int <exp>)`                 -- напечатать значение являющееся результатам вычисления выражения (как число)
-- `(deproc <name> <body-exp1..N>)`    -- объявить процедуру с именем \<name> и телом <body-exp1..N> 
+- `(deproc <name> <body-exp1..N>)`    -- объявить процедуру с именем \<name> и телом <body-exp1..N>
+- `(return)`                          -- выйти из процедуры досрочно
 - `(if <cond> <body-exp1..N>)`        -- условное выражение если \<cond> сделать <body-exp1..N> 
 - `(loop <end-cond> <body-exp1..N>)`  -- цикл с предусловием пока \<cond> выполнять <body-exp1..N>
 - `(+ <exp1> <exp2> ...)`             -- последовательное суммирование всех операндов
